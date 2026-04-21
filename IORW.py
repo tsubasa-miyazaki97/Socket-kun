@@ -49,8 +49,13 @@ def IORW():
                 if not gl.app.AddressText[i-1].get() in gl.AllAddDic[DeviceNo].keys() :
                     DeviceListDic[DeviceNo]['DeviceCnt'] += 1
                     AddressDic[DeviceNo].append(Address)
+                    savedVal = gl.IOConfDic[i-1].get('CurrentVal', '') if isinstance(gl.IOConfDic[i-1], dict) else ''
+                    try:
+                        initRVal = float(savedVal) if savedVal not in ('', None) else 0
+                    except (ValueError, TypeError):
+                        initRVal = 0
                     gl.AllAddDic[DeviceNo][Address]= \
-                        {'Var':gl.app.VarTypecombo[i-1].get(),'RVal':0,'WVal':0,'Ch':i-1,'RAIVal':0,'WAIVal':0,'WFlag':False,\
+                        {'Var':gl.app.VarTypecombo[i-1].get(),'RVal':initRVal,'WVal':0,'Ch':i-1,'RAIVal':0,'WAIVal':0,'WFlag':False,\
                         'AI0':gl.app.AI0ValueText[i-1].get(),'AI100':gl.app.AI100ValueText[i-1].get(),\
                         'User0':gl.app.User0ValueText[i-1].get(),'User100':gl.app.User100ValueText[i-1].get()} 
                 
@@ -366,9 +371,22 @@ def SensorCorrect(now):
 def BackUp():
     #変数に値格納
     for i in range(gl.ChMax):
+        currentVal = ''
+        try:
+            if isinstance(gl.IOConfDic[i], dict):
+                currentVal = gl.IOConfDic[i].get('CurrentVal', '')
+            deviceNo = gl.app.DeviceNoCombo[i].get()
+            address = gl.app.AddressText[i].get()
+            if deviceNo != '' and address != '':
+                dn = int(deviceNo) - 1
+                if dn in gl.AllAddDic and address in gl.AllAddDic[dn]:
+                    currentVal = str(gl.AllAddDic[dn][address]['WVal'])
+        except (ValueError, KeyError, TypeError):
+            pass
         gl.IOConfDic[i] = {'DeviceNo':gl.app.DeviceNoCombo[i].get(),'Address':gl.app.AddressText[i].get(),'Init':gl.app.InitValueText[i].get(),\
                         'UpDown':gl.app.UDValueText[i].get(),'Comment':gl.app.CommentText[i].get(),'VarType':gl.app.VarTypecombo[i].get(),'AI0':gl.app.AI0ValueText[i].get(),\
-                        'AI100':gl.app.AI100ValueText[i].get(),'User0':gl.app.User0ValueText[i].get(),'User100':gl.app.User100ValueText[i].get()}
+                        'AI100':gl.app.AI100ValueText[i].get(),'User0':gl.app.User0ValueText[i].get(),'User100':gl.app.User100ValueText[i].get(),\
+                        'CurrentVal':currentVal}
 
 def EnableCheck():
     
