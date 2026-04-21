@@ -335,8 +335,8 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
         now = time.time()
         if int(gl.app.Periodcombo.get())-1 == DeviceNo :
             gl.app.ScanTime['text']=gl.Period[DeviceNo]
-        #待ち(他スレッドへ処理を譲る: sleep(0)でGILを解放)
-        time.sleep(0)
+        #待ち(他スレッドへ処理を譲る)
+        time.sleep(0.001)
     
     if gl.DeviceConfDic[DeviceNo]['Device'] != "ﾀﾞﾐｰ(接続先無)":#Dummy以外処理 :
         #終了後の処理
