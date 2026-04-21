@@ -26,277 +26,286 @@ class App(tk.Tk):
         # ウィンドウの大きさを決定
         self.geometry(str(gl.winmaxwidth)+"x"+str(gl.winheight))
 
-        # ウィンドウのグリッドを 1x1 にする
-        # この処理をコメントアウトすると配置がズレる
-        self.grid_rowconfigure(0, weight=1)
+        # ツールバー行(row=0)は固定、キャンバス行(row=1)を伸縮
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
-#-----------------------------------main_frame-----------------------------
 
-        frow = 40
-        fcol = 20
-        row = 30
-        col = 90
-        
-        # メインページフレーム作成
-        self.mainm_frame = tk.Frame()#切替用ﾌﾚｰﾑ
-        self.mainm_frame.grid(row=0, column=0)#,sticky="nsew")
+#-----------------------------------toolbar_frame--------------------------
 
-        #スクロールバー設置
-        #self.canvas = tk.Canvas(self.mainm_frame,width=gl.winmaxwidth,height=gl.winheight)#スクロールバー置けるウィジェット(キャンバス)配置
-        self.canvas = tk.Canvas(self,width=gl.winmaxwidth,height=gl.winheight)
-        self.main_frame = tk.Frame(self.canvas,width=gl.winmaxwidth*10,height=30.6*gl.ChMax)#キャンバス上にﾌﾚｰﾑ設置
-        self.canvas.grid(row=0,column=0,sticky="nsew")
-        self.canvas.create_window(0,0,window=self.main_frame,anchor="nw")
-        self.canvas.config(scrollregion=self.canvas.bbox('all'))#フレームにフィットするようにキャンバスのスクロール可能範囲を変更
-        self.main_frame.bind("<Configure>",lambda e: self.canvas.config(scrollregion=self.canvas.bbox('all')))
+        # ツールバーフレーム（row=0 / スクロールしない）
+        toolbar_frame = tk.Frame(self)
+        toolbar_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
 
-        self.ybar = tk.Scrollbar(self,orient=tk.VERTICAL)#縦スクロールバー配置
-        self.ybar.grid(row=0,column=1,sticky=tk.N+tk.S)
-        self.ybar.config(command=self.canvas.yview)#縦スクロール用ｺﾏﾝﾄﾞ
-        self.canvas.config(yscrollcommand=self.ybar.set)#キャンバスにスクロールバーの動きを反映
-        self.canvas.yview_moveto(0)#キャンバスのスクロールを初期化
-        self.main_frame.bind("<MouseWheel>",lambda event,arg1=self.canvas,arg2=self.main_frame: Bind.mouse_y_scroll(event,arg1,arg2))#マウスホイール関数をｾｯﾄ
+        tc = 0  # ツールバー列カウンタ
 
-        #self.main_frame.bind("<Configure>",lambda event,arg1=self.canvas,arg2=self.main_frame:Bind._configure_interior(event,arg1,arg2))#ウィンドウリサイズ関数
-
-        #背景ﾗﾍﾞﾙ
-        self.BGlabel = tk.Label(self.canvas,text='',font=(gl.deffont, gl.fsizes),width=gl.winmaxwidth,height=3)
-        self.BGlabel.place(x=0,y=0)
         # IO読書開始ボタン
-        self.RWStartButton = tk.Button(self.canvas, text="IO読書開始", command=lambda : IORW.IORW())
-        self.RWStartButton.place(x=0,y=0)
+        self.RWStartButton = tk.Button(toolbar_frame, text="IO読書開始", command=lambda: IORW.IORW())
+        self.RWStartButton.grid(row=0, column=tc, padx=2, pady=2)
+        tc += 1
         ### ｽｷｬﾝﾀｲﾑデバイスラベル作成
-        ScanTimeDevicelabel = tk.Label(self.canvas,text='ﾃﾞﾊﾞｲｽNo',font=(gl.deffont, gl.fsizes))
-        ScanTimeDevicelabel.place(x=col,y=0)
+        ScanTimeDevicelabel = tk.Label(toolbar_frame, text='ﾃﾞﾊﾞｲｽNo', font=(gl.deffont, gl.fsizes))
+        ScanTimeDevicelabel.grid(row=0, column=tc, padx=2)
+        tc += 1
         ###ｽｷｬﾝﾀｲﾑ表示切替コンボボックス
-        col += 60
-        self.Periodcombo=ttk.Combobox(self.canvas,values=gl.EnableDevice, font=(gl.deffont, gl.fsizes),width=1)
-        self.Periodcombo.place(x=col,y=0)
-        self.Periodcombo.bind('<FocusOut>',lambda event,arg1=self.Periodcombo,arg2=gl.EnableDevice:Bind.ComboChange(event,arg1,arg2))
+        self.Periodcombo = ttk.Combobox(toolbar_frame, values=gl.EnableDevice, font=(gl.deffont, gl.fsizes), width=1)
+        self.Periodcombo.grid(row=0, column=tc, padx=2)
+        self.Periodcombo.bind('<FocusOut>', lambda event, arg1=self.Periodcombo, arg2=gl.EnableDevice: Bind.ComboChange(event, arg1, arg2))
         self.Periodcombo.set(1)
+        tc += 1
         ### ｽｷｬﾝﾀｲﾑラベル作成
-        col += 30
-        ScanTimelabel = tk.Label(self.canvas,text='ｽｷｬﾝﾀｲﾑ',font=(gl.deffont, gl.fsizes))
-        ScanTimelabel.place(x=col,y=0)
+        ScanTimelabel = tk.Label(toolbar_frame, text='ｽｷｬﾝﾀｲﾑ', font=(gl.deffont, gl.fsizes))
+        ScanTimelabel.grid(row=0, column=tc, padx=2)
+        tc += 1
         ### ｽｷｬﾝﾀｲﾑ作成
-        col += 60
-        self.ScanTime = tk.Label(self.canvas,text=0,font=(gl.deffont, gl.fsizes),width=5,anchor='e')
-        self.ScanTime.place(x=col,y=0)
+        self.ScanTime = tk.Label(toolbar_frame, text=0, font=(gl.deffont, gl.fsizes), width=5, anchor='e')
+        self.ScanTime.grid(row=0, column=tc, padx=2)
+        tc += 1
         ### ｽｷｬﾝﾀｲﾑ単位作成
-        col += 60
-        self.ScanTimems = tk.Label(self.canvas,text='ms',font=(gl.deffont, gl.fsizes))
-        self.ScanTimems.place(x=col,y=0)
+        self.ScanTimems = tk.Label(toolbar_frame, text='ms', font=(gl.deffont, gl.fsizes))
+        self.ScanTimems.grid(row=0, column=tc, padx=2)
+        tc += 1
         # 通信設定ボタン
-        col += 25
-        self.changePageButton = tk.Button(self.canvas, text="通信設定", command=lambda : ConectConfdef())
-        self.changePageButton.place(x=col,y=0)
+        self.changePageButton = tk.Button(toolbar_frame, text="通信設定", command=lambda: ConectConfdef())
+        self.changePageButton.grid(row=0, column=tc, padx=2)
+        tc += 1
         # センサー設定ボタン
-        col += 70
-        self.SensorConfButton = tk.Button(self.canvas, text="ｾﾝｻｰ設定", command=lambda : SensorConfdef())
-        self.SensorConfButton.place(x=col,y=0)
+        self.SensorConfButton = tk.Button(toolbar_frame, text="ｾﾝｻｰ設定", command=lambda: SensorConfdef())
+        self.SensorConfButton.grid(row=0, column=tc, padx=2)
+        tc += 1
         # IO設定クリアボタン
-        col += 67
-        self.IOClearConfButton = tk.Button(self.canvas, text="IO設定ｸﾘｱ", command=lambda : Bind.IOConfClear())
-        self.IOClearConfButton.place(x=col,y=0)
+        self.IOClearConfButton = tk.Button(toolbar_frame, text="IO設定ｸﾘｱ", command=lambda: Bind.IOConfClear())
+        self.IOClearConfButton.grid(row=0, column=tc, padx=2)
+        tc += 1
         # トレースボタン
-        col += 80
-        self.TraceButton = tk.Button(self.canvas, text="ﾄﾚｰｽ開始", command=lambda : Trace.TracePush())
-        self.TraceButton.place(x=col,y=0)
+        self.TraceButton = tk.Button(toolbar_frame, text="ﾄﾚｰｽ開始", command=lambda: Trace.TracePush())
+        self.TraceButton.grid(row=0, column=tc, padx=2)
+        tc += 1
         ###ﾄﾚｰｽｽｷｬﾝﾀｲﾑコンボボックス
-        col += 70
-        self.Tracecombo=ttk.Combobox(self.canvas,values=gl.TraceTime, font=(gl.deffont, gl.fsizes),width=7)
-        self.Tracecombo.place(x=col,y=0)
-        self.Tracecombo.bind('<FocusOut>',lambda event,arg1=self.Tracecombo,arg2=gl.TraceTime:Bind.ComboChange(event,arg1,arg2))
+        self.Tracecombo = ttk.Combobox(toolbar_frame, values=gl.TraceTime, font=(gl.deffont, gl.fsizes), width=7)
+        self.Tracecombo.grid(row=0, column=tc, padx=2)
+        self.Tracecombo.bind('<FocusOut>', lambda event, arg1=self.Tracecombo, arg2=gl.TraceTime: Bind.ComboChange(event, arg1, arg2))
         self.Tracecombo.set(gl.TraceTime[0])
+        tc += 1
         ### ﾄﾚｰｽｽｷｬﾝﾀｲﾑ単位作成
-        col += 90
-        self.TraceScanTimems = tk.Label(self.canvas,text='ms',font=(gl.deffont, gl.fsizes))
-        self.TraceScanTimems.place(x=col,y=0)
+        self.TraceScanTimems = tk.Label(toolbar_frame, text='ms', font=(gl.deffont, gl.fsizes))
+        self.TraceScanTimems.grid(row=0, column=tc, padx=2)
+        tc += 1
         ###表示範囲切替ボタン
-        col += 30
-        self.WinWidthButton = tk.Button(self.canvas, text="◀", command=lambda : Bind.WinWidthSwitch())
-        self.WinWidthButton.place(x=col,y=0)
+        self.WinWidthButton = tk.Button(toolbar_frame, text="◀", command=lambda: Bind.WinWidthSwitch())
+        self.WinWidthButton.grid(row=0, column=tc, padx=2)
+        tc += 1
         # ｴｸｽﾎﾟｰﾄボタン
-        col += 70
-        self.ExportButton = tk.Button(self.canvas, text="ｴｸｽﾎﾟｰﾄ", command=lambda : InExeport.Export())
-        self.ExportButton.place(x=col,y=0)
-        
+        self.ExportButton = tk.Button(toolbar_frame, text="ｴｸｽﾎﾟｰﾄ", command=lambda: InExeport.Export())
+        self.ExportButton.grid(row=0, column=tc, padx=2)
+        tc += 1
         # インポートボタン
-        col += 80
-        self.InportButton = tk.Button(self.canvas, text="ｲﾝﾎﾟｰﾄ", command=lambda : InExeport.Inport())
-        self.InportButton.place(x=col,y=0)
+        self.InportButton = tk.Button(toolbar_frame, text="ｲﾝﾎﾟｰﾄ", command=lambda: InExeport.Inport())
+        self.InportButton.grid(row=0, column=tc, padx=2)
 
+#-----------------------------------canvas / main_frame--------------------
 
-        col = 35
-        # ChNoラベル
-        self.ChNoLabel = tk.Label(self.canvas, text="ChNo", font=(gl.deffont, gl.fsizes))
-        self.ChNoLabel.place(x=fcol-fcol/2,y=frow)
-        self.Nolabel=[]
-        for i in range(1,gl.ChMax+1) :
-            self.Nolabel.insert(i,tk.Label(self.main_frame, text=i , font=(gl.deffont,gl.fsizes)))
-            self.Nolabel[i-1].place(x=fcol,y=i*row+frow)
-            
-        # ﾃﾞﾊﾞｲｽNoラベル
-        self.DeviceNoLabel = tk.Label(self.canvas, text="ﾃﾞﾊﾞｲｽNo", font=(gl.deffont, gl.fsizes))
-        self.DeviceNoLabel.place(x=fcol-fcol/2+col,y=frow)
-        #ﾃﾞﾊﾞｲｽNoﾃｷｽﾄﾎﾞｯｸｽ
-        self.DeviceNoCombo=[]
-        for i in range(1,gl.ChMax+1) :
-            self.DeviceNoCombo.insert(i,ttk.Combobox(self.main_frame,values=gl.EnableDevice, font=(gl.deffont, gl.fsizes),width=2))
-            self.DeviceNoCombo[i-1].place(x=fcol+col,y=i*row+frow)
-            self.DeviceNoCombo[i-1].bind('<FocusOut>',lambda event,arg1=self.DeviceNoCombo[i-1],arg2=gl.EnableDevice:Bind.ComboChange(event,arg1,arg2))
+        # スクロールバー設置
+        self.canvas = tk.Canvas(self, width=gl.winmaxwidth, height=gl.winheight)
+        self.canvas.grid(row=1, column=0, sticky="nsew")
 
-        # 読書アドレスラベル
-        col += 55
-        self.RWAddressLabel = tk.Label(self.canvas, text="読書ｱﾄﾞﾚｽ", font=(gl.deffont, gl.fsizes))
-        self.RWAddressLabel.place(x=fcol+col,y=frow)
-        #読書アドレスﾃｷｽﾄﾎﾞｯｸｽ
-        self.AddressText=[]
-        for i in range(1,gl.ChMax+1) :
-            self.AddressText.insert(i,tk.Entry(self.main_frame , font=(gl.deffont,gl.fsizes),width=12))
-            self.AddressText[i-1].place(x=fcol+col,y=i*row+frow)
+        self.ybar = tk.Scrollbar(self, orient=tk.VERTICAL)  # 縦スクロールバー配置
+        self.ybar.grid(row=1, column=1, sticky=tk.N+tk.S)
+        self.ybar.config(command=self.canvas.yview)  # 縦スクロール用ｺﾏﾝﾄﾞ
+        self.canvas.config(yscrollcommand=self.ybar.set)  # キャンバスにスクロールバーの動きを反映
+        self.canvas.yview_moveto(0)  # キャンバスのスクロールを初期化
 
-        # 現在値ラベル
-        col += 95
-        self.ValueLabel = tk.Label(self.canvas, text="現在値", font=(gl.deffont, gl.fsizes))
-        self.ValueLabel.place(x=fcol+col,y=frow)
-        #現在値ﾃｷｽﾄﾎﾞｯｸｽ
-        self.ValueText=[]
-        for i in range(1,gl.ChMax+1) :
-            gl.ValueText[i-1]= tk.StringVar()
-            self.ValueText.insert(i,tk.Entry(self.main_frame ,textvariable=gl.ValueText[i-1], font=(gl.deffont,gl.fsizes),width=12))
-            self.ValueText[i-1].place(x=fcol+col,y=i*row+frow)
-            self.ValueText[i-1].bind('<FocusIn>',lambda event,arg1=i-1,arg2=gl.ValueTextFocus:Bind.ValueTextFocusIn(event,arg1,arg2))
-            self.ValueText[i-1].bind('<FocusOut>',lambda event,arg1=i-1,arg2=gl.ValueTextFocus:Bind.ValueTextFocusOut(event,arg1,arg2))
-            self.ValueText[i-1].bind('<KeyRelease>',lambda event,arg1=i-1,arg2=gl.ValueText:Bind.ValueTextEnter(event,arg1,arg2))
-        
-        #値増減ﾗﾍﾞﾙ
-        col += 95
-        self.ValueUDLabel = tk.Label(self.canvas, text="増減ﾎﾞﾀﾝ", font=(gl.deffont, gl.fsizes))
-        self.ValueUDLabel.place(x=fcol+col,y=frow)
-        #値増減ﾎﾞﾀﾝ
-        self.ValueUpButton=[]
-        self.ValueDownButton=[]
-        for i in range(1,gl.ChMax+1) :
-            self.ValueUpButton.insert(i,tk.Button(self.main_frame, text='▲' , font=(gl.deffont,gl.fsizes),command = partial(Bind.ValueUp,i-1)))
-            self.ValueUpButton[i-1].place(x=fcol+col+25,y=i*row+frow)
-            self.ValueDownButton.insert(i,tk.Button(self.main_frame, text='▼' , font=(gl.deffont,gl.fsizes),command = partial(Bind.ValueDown,i-1)))
-            self.ValueDownButton[i-1].place(x=fcol+col,y=i*row+frow)
-            self.ValueUpButton[i-1]['state']='disabled'
-            self.ValueDownButton[i-1]['state']='disabled'
+        # キャンバス上にフレーム設置（ヘッダー行 + データ行をまとめて grid 管理）
+        self.main_frame = tk.Frame(self.canvas, width=gl.winmaxwidth*10)
+        self.canvas.create_window(0, 0, window=self.main_frame, anchor="nw")
+        self.canvas.config(scrollregion=self.canvas.bbox('all'))  # フレームにフィットするようにキャンバスのスクロール可能範囲を変更
+        self.main_frame.bind("<Configure>", lambda e: self.canvas.config(scrollregion=self.canvas.bbox('all')))
+        self.main_frame.bind("<MouseWheel>", lambda event, arg1=self.canvas, arg2=self.main_frame: Bind.mouse_y_scroll(event, arg1, arg2))  # マウスホイール関数をｾｯﾄ
 
-        # 増減値ラベル
-        col += 60
-        self.UDLabel = tk.Label(self.canvas, text="増減値", font=(gl.deffont, gl.fsizes))
-        self.UDLabel.place(x=fcol+col,y=frow)
-        #増減値ﾃｷｽﾄﾎﾞｯｸｽ
-        self.UDValueText=[]
-        for i in range(1,gl.ChMax+1) :
-            self.UDValueText.insert(i,tk.Entry(self.main_frame , font=(gl.deffont,gl.fsizes),width=7))
-            self.UDValueText[i-1].place(x=fcol+col,y=i*row+frow)
-            self.UDValueText[i-1].bind('<FocusOut>',lambda event,arg1=self.UDValueText[i-1]:Bind.TextFloatCheck(event,arg1))
-        
-        # 初期値ラベル
-        col += 60
-        self.InitLabel = tk.Label(self.canvas, text="初期値", font=(gl.deffont, gl.fsizes))
-        self.InitLabel.place(x=fcol+col,y=frow)
-        #初期値ﾃｷｽﾄﾎﾞｯｸｽ
-        self.InitValueText=[]
-        for i in range(1,gl.ChMax+1) :
-            self.InitValueText.insert(i,tk.Entry(self.main_frame , font=(gl.deffont,gl.fsizes),width=7))
-            self.InitValueText[i-1].place(x=fcol+col,y=i*row+frow)
-            self.InitValueText[i-1].bind('<FocusOut>',lambda event,arg1=self.InitValueText[i-1]:Bind.TextFloatCheck(event,arg1))
-        
-        
-        # ｺﾒﾝﾄラベル
-        col += 60
-        self.CommentLabel = tk.Label(self.canvas, text="ｺﾒﾝﾄ", font=(gl.deffont, gl.fsizes))
-        self.CommentLabel.place(x=fcol+col,y=frow)
-        #ｺﾒﾝﾄﾃｷｽﾄﾎﾞｯｸｽ
-        self.CommentText=[]
-        for i in range(1,gl.ChMax+1) :
-            self.CommentText.insert(i,tk.Entry(self.main_frame , font=(gl.deffont,gl.fsizes),width=26))
-            self.CommentText[i-1].place(x=fcol+col,y=i*row+frow)
+#-----------------------------------列定数---------------------------------
 
-        # 型ラベル
-        col += 195
-        self.VarTypeLabel = tk.Label(self.canvas, text="型", font=(gl.deffont, gl.fsizes))
-        self.VarTypeLabel.place(x=fcol+col,y=frow)
-        #型ﾎﾞｯｸｽ
-        self.VarTypecombo=[]
-        for i in range(1,gl.ChMax+1) :
-            self.VarTypecombo.insert(i, ttk.Combobox(self.main_frame,values=gl.VarTypeList, font=(gl.deffont, gl.fsizes),width=5))
-            self.VarTypecombo[i-1].place(x=fcol+col,y=i*row+frow)
-            self.VarTypecombo[i-1].bind('<FocusOut>',lambda event,arg1=self.VarTypecombo[i-1],arg2=gl.VarTypeList:Bind.ComboChange(event,arg1,arg2))
-        
-        # 0%AI値ラベル
-        col += 65
-        self.AI0Label = tk.Label(self.canvas, text="0%AI値", font=(gl.deffont, gl.fsizes))
-        self.AI0Label.place(x=fcol+col,y=frow)
-        #0%AI値ﾃｷｽﾄﾎﾞｯｸｽ
-        self.AI0ValueText=[]
-        for i in range(1,gl.ChMax+1) :
-            self.AI0ValueText.insert(i,tk.Entry(self.main_frame , font=(gl.deffont,gl.fsizes),width=7))
-            self.AI0ValueText[i-1].place(x=fcol+col,y=i*row+frow)
-            self.AI0ValueText[i-1].bind('<FocusOut>',lambda event,arg1=self.AI0ValueText[i-1]:Bind.TextFloatCheck(event,arg1))
-        # 100%AI値ラベル
-        col += 60
-        self.AI100Label = tk.Label(self.canvas, text="100%AI値", font=(gl.deffont, gl.fsizes))
-        self.AI100Label.place(x=fcol+col,y=frow)
-        #100%AI値ﾃｷｽﾄﾎﾞｯｸｽ
-        self.AI100ValueText=[]
-        for i in range(1,gl.ChMax+1) :
-            self.AI100ValueText.insert(i,tk.Entry(self.main_frame , font=(gl.deffont,gl.fsizes),width=12))
-            self.AI100ValueText[i-1].place(x=fcol+col,y=i*row+frow)
-            self.AI100ValueText[i-1].bind('<FocusOut>',lambda event,arg1=self.AI100ValueText[i-1]:Bind.TextFloatCheck(event,arg1))
-            
-        # 0%User値ラベル
-        col += 95
-        self.User0Label = tk.Label(self.canvas, text="0%ﾕｰｻﾞ値", font=(gl.deffont, gl.fsizes))
-        self.User0Label.place(x=fcol+col,y=frow)
-        #0%User値ﾃｷｽﾄﾎﾞｯｸｽ
-        self.User0ValueText=[]
-        for i in range(1,gl.ChMax+1) :
-            self.User0ValueText.insert(i,tk.Entry(self.main_frame , font=(gl.deffont,gl.fsizes),width=7))
-            self.User0ValueText[i-1].place(x=fcol+col,y=i*row+frow)
-            self.User0ValueText[i-1].bind('<FocusOut>',lambda event,arg1=self.User0ValueText[i-1]:Bind.TextFloatCheck(event,arg1))
-        # 100%User値ラベル
-        col += 65
-        self.User100Label = tk.Label(self.canvas, text="100%ﾕｰｻﾞ値", font=(gl.deffont, gl.fsizes))
-        self.User100Label.place(x=fcol+col,y=frow)
-        #100%User値ﾃｷｽﾄﾎﾞｯｸｽ
-        self.User100ValueText=[]
-        for i in range(1,gl.ChMax+1) :
-            self.User100ValueText.insert(i,tk.Entry(self.main_frame , font=(gl.deffont,gl.fsizes),width=12))
-            self.User100ValueText[i-1].place(x=fcol+col,y=i*row+frow)
-            self.User100ValueText[i-1].bind('<FocusOut>',lambda event,arg1=self.User100ValueText[i-1]:Bind.TextFloatCheck(event,arg1))
-        
+        C_CHNO      = 0
+        C_DEVICENO  = 1
+        C_ADDRESS   = 2
+        C_VALUE     = 3
+        C_VALUEDOWN = 4
+        C_VALUEUP   = 5
+        C_UDVALUE   = 6
+        C_INIT      = 7
+        C_COMMENT   = 8
+        C_VARTYPE   = 9
+        C_AI0       = 10
+        C_AI100     = 11
+        C_USER0     = 12
+        C_USER100   = 13
+
+#-----------------------------------ヘッダー行 (row=0)--------------------
+
+        self.ChNoLabel = tk.Label(self.main_frame, text="ChNo", font=(gl.deffont, gl.fsizes))
+        self.ChNoLabel.grid(row=0, column=C_CHNO, padx=2, pady=2)
+
+        self.DeviceNoLabel = tk.Label(self.main_frame, text="ﾃﾞﾊﾞｲｽNo", font=(gl.deffont, gl.fsizes))
+        self.DeviceNoLabel.grid(row=0, column=C_DEVICENO, padx=2, pady=2)
+
+        self.RWAddressLabel = tk.Label(self.main_frame, text="読書ｱﾄﾞﾚｽ", font=(gl.deffont, gl.fsizes))
+        self.RWAddressLabel.grid(row=0, column=C_ADDRESS, padx=2, pady=2)
+
+        self.ValueLabel = tk.Label(self.main_frame, text="現在値", font=(gl.deffont, gl.fsizes))
+        self.ValueLabel.grid(row=0, column=C_VALUE, padx=2, pady=2)
+
+        self.ValueUDLabel = tk.Label(self.main_frame, text="増減ﾎﾞﾀﾝ", font=(gl.deffont, gl.fsizes))
+        self.ValueUDLabel.grid(row=0, column=C_VALUEDOWN, padx=2, pady=2, columnspan=2)
+
+        self.UDLabel = tk.Label(self.main_frame, text="増減値", font=(gl.deffont, gl.fsizes))
+        self.UDLabel.grid(row=0, column=C_UDVALUE, padx=2, pady=2)
+
+        self.InitLabel = tk.Label(self.main_frame, text="初期値", font=(gl.deffont, gl.fsizes))
+        self.InitLabel.grid(row=0, column=C_INIT, padx=2, pady=2)
+
+        self.CommentLabel = tk.Label(self.main_frame, text="ｺﾒﾝﾄ", font=(gl.deffont, gl.fsizes))
+        self.CommentLabel.grid(row=0, column=C_COMMENT, padx=2, pady=2)
+
+        self.VarTypeLabel = tk.Label(self.main_frame, text="型", font=(gl.deffont, gl.fsizes))
+        self.VarTypeLabel.grid(row=0, column=C_VARTYPE, padx=2, pady=2)
+
+        self.AI0Label = tk.Label(self.main_frame, text="0%AI値", font=(gl.deffont, gl.fsizes))
+        self.AI0Label.grid(row=0, column=C_AI0, padx=2, pady=2)
+
+        self.AI100Label = tk.Label(self.main_frame, text="100%AI値", font=(gl.deffont, gl.fsizes))
+        self.AI100Label.grid(row=0, column=C_AI100, padx=2, pady=2)
+
+        self.User0Label = tk.Label(self.main_frame, text="0%ﾕｰｻﾞ値", font=(gl.deffont, gl.fsizes))
+        self.User0Label.grid(row=0, column=C_USER0, padx=2, pady=2)
+
+        self.User100Label = tk.Label(self.main_frame, text="100%ﾕｰｻﾞ値", font=(gl.deffont, gl.fsizes))
+        self.User100Label.grid(row=0, column=C_USER100, padx=2, pady=2)
+
+#-----------------------------------データ行 (row=1..ChMax)---------------
+
+        self.Nolabel = []
+        self.DeviceNoCombo = []
+        self.AddressText = []
+        self.ValueText = []
+        self.ValueUpButton = []
+        self.ValueDownButton = []
+        self.UDValueText = []
+        self.InitValueText = []
+        self.CommentText = []
+        self.VarTypecombo = []
+        self.AI0ValueText = []
+        self.AI100ValueText = []
+        self.User0ValueText = []
+        self.User100ValueText = []
+
+        for i in range(1, gl.ChMax+1):
+            r = i  # grid row（0=ヘッダー、1以降=データ）
+
+            # ChNo
+            lbl = tk.Label(self.main_frame, text=i, font=(gl.deffont, gl.fsizes))
+            lbl.grid(row=r, column=C_CHNO, padx=2)
+            self.Nolabel.append(lbl)
+
+            # ﾃﾞﾊﾞｲｽNo
+            combo = ttk.Combobox(self.main_frame, values=gl.EnableDevice, font=(gl.deffont, gl.fsizes), width=2)
+            combo.grid(row=r, column=C_DEVICENO, padx=2)
+            combo.bind('<FocusOut>', lambda event, arg1=combo, arg2=gl.EnableDevice: Bind.ComboChange(event, arg1, arg2))
+            self.DeviceNoCombo.append(combo)
+
+            # 読書アドレス
+            addr = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=12)
+            addr.grid(row=r, column=C_ADDRESS, padx=2)
+            self.AddressText.append(addr)
+
+            # 現在値
+            gl.ValueText[i-1] = tk.StringVar()
+            val = tk.Entry(self.main_frame, textvariable=gl.ValueText[i-1], font=(gl.deffont, gl.fsizes), width=12)
+            val.grid(row=r, column=C_VALUE, padx=2)
+            val.bind('<FocusIn>', lambda event, arg1=i-1, arg2=gl.ValueTextFocus: Bind.ValueTextFocusIn(event, arg1, arg2))
+            val.bind('<FocusOut>', lambda event, arg1=i-1, arg2=gl.ValueTextFocus: Bind.ValueTextFocusOut(event, arg1, arg2))
+            val.bind('<KeyRelease>', lambda event, arg1=i-1, arg2=gl.ValueText: Bind.ValueTextEnter(event, arg1, arg2))
+            self.ValueText.append(val)
+
+            # 値減少ボタン（▼）
+            down = tk.Button(self.main_frame, text='▼', font=(gl.deffont, gl.fsizes), command=partial(Bind.ValueDown, i-1))
+            down.grid(row=r, column=C_VALUEDOWN, padx=2)
+            down['state'] = 'disabled'
+            self.ValueDownButton.append(down)
+
+            # 値増加ボタン（▲）
+            up = tk.Button(self.main_frame, text='▲', font=(gl.deffont, gl.fsizes), command=partial(Bind.ValueUp, i-1))
+            up.grid(row=r, column=C_VALUEUP, padx=2)
+            up['state'] = 'disabled'
+            self.ValueUpButton.append(up)
+
+            # 増減値
+            ud = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=7)
+            ud.grid(row=r, column=C_UDVALUE, padx=2)
+            ud.bind('<FocusOut>', lambda event, arg1=ud: Bind.TextFloatCheck(event, arg1))
+            self.UDValueText.append(ud)
+
+            # 初期値
+            init = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=7)
+            init.grid(row=r, column=C_INIT, padx=2)
+            init.bind('<FocusOut>', lambda event, arg1=init: Bind.TextFloatCheck(event, arg1))
+            self.InitValueText.append(init)
+
+            # ｺﾒﾝﾄ
+            comment = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=26)
+            comment.grid(row=r, column=C_COMMENT, padx=2)
+            self.CommentText.append(comment)
+
+            # 型
+            vtype = ttk.Combobox(self.main_frame, values=gl.VarTypeList, font=(gl.deffont, gl.fsizes), width=5)
+            vtype.grid(row=r, column=C_VARTYPE, padx=2)
+            vtype.bind('<FocusOut>', lambda event, arg1=vtype, arg2=gl.VarTypeList: Bind.ComboChange(event, arg1, arg2))
+            self.VarTypecombo.append(vtype)
+
+            # 0%AI値
+            ai0 = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=7)
+            ai0.grid(row=r, column=C_AI0, padx=2)
+            ai0.bind('<FocusOut>', lambda event, arg1=ai0: Bind.TextFloatCheck(event, arg1))
+            self.AI0ValueText.append(ai0)
+
+            # 100%AI値
+            ai100 = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=12)
+            ai100.grid(row=r, column=C_AI100, padx=2)
+            ai100.bind('<FocusOut>', lambda event, arg1=ai100: Bind.TextFloatCheck(event, arg1))
+            self.AI100ValueText.append(ai100)
+
+            # 0%User値
+            user0 = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=7)
+            user0.grid(row=r, column=C_USER0, padx=2)
+            user0.bind('<FocusOut>', lambda event, arg1=user0: Bind.TextFloatCheck(event, arg1))
+            self.User0ValueText.append(user0)
+
+            # 100%User値
+            user100 = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=12)
+            user100.grid(row=r, column=C_USER100, padx=2)
+            user100.bind('<FocusOut>', lambda event, arg1=user100: Bind.TextFloatCheck(event, arg1))
+            self.User100ValueText.append(user100)
+
         #フレーム内全ウィジェットにマウスホイール関数ｾｯﾄ
         mainframechild = self.main_frame.winfo_children()
-        for child in mainframechild :
-            child.bind("<MouseWheel>",lambda event,arg1=self.canvas,arg2=child: Bind.mouse_y_scroll(event,arg1,arg2))#マウスホイール関数をｾｯﾄ
-        
+        for child in mainframechild:
+            child.bind("<MouseWheel>", lambda event, arg1=self.canvas, arg2=child: Bind.mouse_y_scroll(event, arg1, arg2))  # マウスホイール関数をｾｯﾄ
 
         #各ウィジェットに文字反映
-        
-        for i in range(gl.ChMax) :
-            self.DeviceNoCombo[i].insert(0,str(gl.IOConfDic[i]['DeviceNo']))
-            self.AddressText[i].insert(0,str(gl.IOConfDic[i]['Address']))
-            self.InitValueText[i].insert(0,str(gl.IOConfDic[i]['Init']))
-            self.UDValueText[i].insert(0,str(gl.IOConfDic[i]['UpDown']))
-            self.CommentText[i].insert(0,str(gl.IOConfDic[i]['Comment']))
-            self.VarTypecombo[i].insert(0,str(gl.IOConfDic[i]['VarType']))
-            self.AI0ValueText[i].insert(0,str(gl.IOConfDic[i]['AI0']))
-            self.AI100ValueText[i].insert(0,str(gl.IOConfDic[i]['AI100']))
-            self.User0ValueText[i].insert(0,str(gl.IOConfDic[i]['User0']))
-            self.User100ValueText[i].insert(0,str(gl.IOConfDic[i]['User100']))
+        for i in range(gl.ChMax):
+            self.DeviceNoCombo[i].insert(0, str(gl.IOConfDic[i]['DeviceNo']))
+            self.AddressText[i].insert(0, str(gl.IOConfDic[i]['Address']))
+            self.InitValueText[i].insert(0, str(gl.IOConfDic[i]['Init']))
+            self.UDValueText[i].insert(0, str(gl.IOConfDic[i]['UpDown']))
+            self.CommentText[i].insert(0, str(gl.IOConfDic[i]['Comment']))
+            self.VarTypecombo[i].insert(0, str(gl.IOConfDic[i]['VarType']))
+            self.AI0ValueText[i].insert(0, str(gl.IOConfDic[i]['AI0']))
+            self.AI100ValueText[i].insert(0, str(gl.IOConfDic[i]['AI100']))
+            self.User0ValueText[i].insert(0, str(gl.IOConfDic[i]['User0']))
+            self.User100ValueText[i].insert(0, str(gl.IOConfDic[i]['User100']))
 
 #--------------------------------------------------------------------------
 
-        #main_frameを一番上に表示
-        self.mainm_frame.tkraise()
         #ウインドウ閉じをキャッチ
-        self.protocol("WM_DELETE_WINDOW",callback)
+        self.protocol("WM_DELETE_WINDOW", callback)
 
 def ConectConfdef():
     ConectConf.ConectConf()  
