@@ -108,108 +108,141 @@ def SensorConf() :
         gl.app.DisableCheck=[]
         gl.app.DisableVal = []
 
-        for i in range(1,gl.ChMax+1) :
-            r = i  # row (0=ヘッダー, 1..ChMax=データ)
+        # after()でバッチ構築: イベントループを都度解放して編集可能になるまでの時間を短縮
+        BATCH = 20
 
-            lbl = tk.Label(gl.app.SensorFrame, text=i, font=(deffont, fsizes))
-            lbl.grid(row=r, column=C_NO, padx=2)
-            gl.app.SensorNolabel.insert(i, lbl)
+        def _build_batch(start):
+            if gl.SensorConfWin is None or not gl.SensorConfWin.winfo_exists():
+                return
+            canvas = gl.app.Sensorcanvas
+            end = min(start + BATCH, gl.ChMax + 1)
 
-            combo = ttk.Combobox(gl.app.SensorFrame, values=gl.SensorList, font=(deffont, fsizes), width=8)
-            combo.grid(row=r, column=C_SENSOR, padx=2)
-            combo.bind('<FocusOut>', lambda event, arg1=combo, arg2=gl.SensorList, arg3=i-1: (Bind.ComboChange(event,arg1,arg2), SensorSelect(event,arg2,arg3)))
-            combo.bind("<<ComboboxSelected>>", lambda event, arg1=gl.SensorList, arg2=i-1: SensorSelect(event,arg1,arg2))
-            gl.app.SensorCombo.insert(i, combo)
+            for i in range(start, end):
+                r = i  # row (0=ヘッダー, 1..ChMax=データ)
 
-            in1 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
-            in1.grid(row=r, column=C_IN1, padx=2)
-            in1.bind('<FocusOut>', lambda event, arg1=in1, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
-            gl.app.In1Combo.insert(i, in1)
+                lbl = tk.Label(gl.app.SensorFrame, text=i, font=(deffont, fsizes))
+                lbl.grid(row=r, column=C_NO, padx=2)
+                lbl.bind("<MouseWheel>", lambda event, a=canvas, b=lbl: Bind.mouse_y_scroll(event, a, b))
+                lbl.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.SensorNolabel.insert(i, lbl)
 
-            in2 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
-            in2.grid(row=r, column=C_IN2, padx=2)
-            in2.bind('<FocusOut>', lambda event, arg1=in2, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
-            gl.app.In2Combo.insert(i, in2)
+                combo = ttk.Combobox(gl.app.SensorFrame, values=gl.SensorList, font=(deffont, fsizes), width=8)
+                combo.grid(row=r, column=C_SENSOR, padx=2)
+                combo.bind('<FocusOut>', lambda event, arg1=combo, arg2=gl.SensorList, arg3=i-1: (Bind.ComboChange(event,arg1,arg2), SensorSelect(event,arg2,arg3)))
+                combo.bind("<<ComboboxSelected>>", lambda event, arg1=gl.SensorList, arg2=i-1: SensorSelect(event,arg1,arg2))
+                combo.bind("<MouseWheel>", lambda event, a=canvas, b=combo: Bind.mouse_y_scroll(event, a, b))
+                combo.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.SensorCombo.insert(i, combo)
 
-            out1 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
-            out1.grid(row=r, column=C_OUT1, padx=2)
-            out1.bind('<FocusOut>', lambda event, arg1=out1, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
-            gl.app.Out1Combo.insert(i, out1)
+                in1 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
+                in1.grid(row=r, column=C_IN1, padx=2)
+                in1.bind('<FocusOut>', lambda event, arg1=in1, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
+                in1.bind("<MouseWheel>", lambda event, a=canvas, b=in1: Bind.mouse_y_scroll(event, a, b))
+                in1.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.In1Combo.insert(i, in1)
 
-            out2 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
-            out2.grid(row=r, column=C_OUT2, padx=2)
-            out2.bind('<FocusOut>', lambda event, arg1=out2, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
-            gl.app.Out2Combo.insert(i, out2)
+                in2 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
+                in2.grid(row=r, column=C_IN2, padx=2)
+                in2.bind('<FocusOut>', lambda event, arg1=in2, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
+                in2.bind("<MouseWheel>", lambda event, a=canvas, b=in2: Bind.mouse_y_scroll(event, a, b))
+                in2.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.In2Combo.insert(i, in2)
 
-            out1inv_val = tk.BooleanVar()
-            out1inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out1inv_val)
-            out1inv_check.grid(row=r, column=C_OUT1INV, padx=2)
-            gl.app.Out1InvVal.insert(i, out1inv_val)
-            gl.app.Out1InvCheck.insert(i, out1inv_check)
+                out1 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
+                out1.grid(row=r, column=C_OUT1, padx=2)
+                out1.bind('<FocusOut>', lambda event, arg1=out1, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
+                out1.bind("<MouseWheel>", lambda event, a=canvas, b=out1: Bind.mouse_y_scroll(event, a, b))
+                out1.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.Out1Combo.insert(i, out1)
 
-            out2inv_val = tk.BooleanVar()
-            out2inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out2inv_val)
-            out2inv_check.grid(row=r, column=C_OUT2INV, padx=2)
-            gl.app.Out2InvVal.insert(i, out2inv_val)
-            gl.app.Out2InvCheck.insert(i, out2inv_check)
+                out2 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
+                out2.grid(row=r, column=C_OUT2, padx=2)
+                out2.bind('<FocusOut>', lambda event, arg1=out2, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
+                out2.bind("<MouseWheel>", lambda event, a=canvas, b=out2: Bind.mouse_y_scroll(event, a, b))
+                out2.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.Out2Combo.insert(i, out2)
 
-            para1 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
-            para1.grid(row=r, column=C_PARA1, padx=2)
-            para1.bind('<FocusOut>', lambda event, arg1=para1: Bind.TextFloatCheck(event,arg1))
-            gl.app.DigitsCoefText.insert(i, para1)
+                out1inv_val = tk.BooleanVar()
+                out1inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out1inv_val)
+                out1inv_check.grid(row=r, column=C_OUT1INV, padx=2)
+                out1inv_check.bind("<MouseWheel>", lambda event, a=canvas, b=out1inv_check: Bind.mouse_y_scroll(event, a, b))
+                out1inv_check.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.Out1InvVal.insert(i, out1inv_val)
+                gl.app.Out1InvCheck.insert(i, out1inv_check)
 
-            para2 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
-            para2.grid(row=r, column=C_PARA2, padx=2)
-            para2.bind('<FocusOut>', lambda event, arg1=para2: Bind.TextFloatCheck(event,arg1))
-            gl.app.CalcCoefText.insert(i, para2)
+                out2inv_val = tk.BooleanVar()
+                out2inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out2inv_val)
+                out2inv_check.grid(row=r, column=C_OUT2INV, padx=2)
+                out2inv_check.bind("<MouseWheel>", lambda event, a=canvas, b=out2inv_check: Bind.mouse_y_scroll(event, a, b))
+                out2inv_check.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.Out2InvVal.insert(i, out2inv_val)
+                gl.app.Out2InvCheck.insert(i, out2inv_check)
 
-            para3 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
-            para3.grid(row=r, column=C_PARA3, padx=2)
-            para3.bind('<FocusOut>', lambda event, arg1=para3: Bind.TextFloatCheck(event,arg1))
-            gl.app.RatioText.insert(i, para3)
+                para1 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
+                para1.grid(row=r, column=C_PARA1, padx=2)
+                para1.bind('<FocusOut>', lambda event, arg1=para1: Bind.TextFloatCheck(event,arg1))
+                para1.bind("<MouseWheel>", lambda event, a=canvas, b=para1: Bind.mouse_y_scroll(event, a, b))
+                para1.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.DigitsCoefText.insert(i, para1)
 
-            para4 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
-            para4.grid(row=r, column=C_PARA4, padx=2)
-            para4.bind('<FocusOut>', lambda event, arg1=para4: Bind.TextFloatCheck(event,arg1))
-            gl.app.TimeLagText.insert(i, para4)
+                para2 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
+                para2.grid(row=r, column=C_PARA2, padx=2)
+                para2.bind('<FocusOut>', lambda event, arg1=para2: Bind.TextFloatCheck(event,arg1))
+                para2.bind("<MouseWheel>", lambda event, a=canvas, b=para2: Bind.mouse_y_scroll(event, a, b))
+                para2.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.CalcCoefText.insert(i, para2)
 
-            disable_val = tk.BooleanVar()
-            disable_check = ttk.Checkbutton(gl.app.SensorFrame, variable=disable_val)
-            disable_check.grid(row=r, column=C_DISABLE, padx=2)
-            gl.app.DisableVal.insert(i, disable_val)
-            gl.app.DisableCheck.insert(i, disable_check)
+                para3 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
+                para3.grid(row=r, column=C_PARA3, padx=2)
+                para3.bind('<FocusOut>', lambda event, arg1=para3: Bind.TextFloatCheck(event,arg1))
+                para3.bind("<MouseWheel>", lambda event, a=canvas, b=para3: Bind.mouse_y_scroll(event, a, b))
+                para3.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.RatioText.insert(i, para3)
 
-            if i % 50 == 0:
-                gl.SensorConfWin.update_idletasks()
+                para4 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
+                para4.grid(row=r, column=C_PARA4, padx=2)
+                para4.bind('<FocusOut>', lambda event, arg1=para4: Bind.TextFloatCheck(event,arg1))
+                para4.bind("<MouseWheel>", lambda event, a=canvas, b=para4: Bind.mouse_y_scroll(event, a, b))
+                para4.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.TimeLagText.insert(i, para4)
 
-        #マウスホイール動作ｾｯﾄ
-        framechild = gl.app.SensorFrame.winfo_children()
-        for child in framechild :
-            child.bind("<MouseWheel>",lambda event,arg1=gl.app.Sensorcanvas,arg2=child: Bind.mouse_y_scroll(event,arg1,arg2))
-            child.bind("<FocusIn>",lambda event: Bind.TipDel(event))
+                disable_val = tk.BooleanVar()
+                disable_check = ttk.Checkbutton(gl.app.SensorFrame, variable=disable_val)
+                disable_check.grid(row=r, column=C_DISABLE, padx=2)
+                disable_check.bind("<MouseWheel>", lambda event, a=canvas, b=disable_check: Bind.mouse_y_scroll(event, a, b))
+                disable_check.bind("<FocusIn>", lambda event: Bind.TipDel(event))
+                gl.app.DisableVal.insert(i, disable_val)
+                gl.app.DisableCheck.insert(i, disable_check)
 
+                # ウィジェットに値を反映
+                idx = i - 1
+                combo.set(gl.SensorConfDic[idx]['Sensor'])
+                in1.set(gl.SensorConfDic[idx]['In1'])
+                in2.set(gl.SensorConfDic[idx]['In2'])
+                out1.set(gl.SensorConfDic[idx]['Out1'])
+                out2.set(gl.SensorConfDic[idx]['Out2'])
+                out1inv_val.set(gl.SensorConfDic[idx]['Out1Inv'])
+                out2inv_val.set(gl.SensorConfDic[idx]['Out2Inv'])
+                para1.insert(tk.END, gl.SensorConfDic[idx]['DigitsCoef'])
+                para2.insert(tk.END, gl.SensorConfDic[idx]['CalcCoef'])
+                para3.insert(tk.END, gl.SensorConfDic[idx]['Ratio'])
+                para4.insert(tk.END, gl.SensorConfDic[idx]['TimeLag'])
+                disable_val.set(gl.SensorConfDic[idx]['Disable'])
+                SensorSelect('', gl.SensorList, idx)
 
-        #各ウィジェットに文字反映
-        for i in range(gl.ChMax) :
-            gl.app.SensorCombo[i].set(gl.SensorConfDic[i]['Sensor'])
-            gl.app.In1Combo[i].set(gl.SensorConfDic[i]['In1'])
-            gl.app.In2Combo[i].set(gl.SensorConfDic[i]['In2'])
-            gl.app.Out1Combo[i].set(gl.SensorConfDic[i]['Out1'])
-            gl.app.Out2Combo[i].set(gl.SensorConfDic[i]['Out2'])
-            gl.app.Out1InvVal[i].set(gl.SensorConfDic[i]['Out1Inv'])
-            gl.app.Out2InvVal[i].set(gl.SensorConfDic[i]['Out2Inv'])
-            gl.app.DigitsCoefText[i].insert(tk.END,gl.SensorConfDic[i]['DigitsCoef'])
-            gl.app.CalcCoefText[i].insert(tk.END,gl.SensorConfDic[i]['CalcCoef'])
-            gl.app.RatioText[i].insert(tk.END,gl.SensorConfDic[i]['Ratio'])
-            gl.app.TimeLagText[i].insert(tk.END,gl.SensorConfDic[i]['TimeLag'])
-            gl.app.DisableVal[i].set(gl.SensorConfDic[i]['Disable'])
-            SensorSelect('',gl.SensorList,i)
+            canvas.config(scrollregion=canvas.bbox('all'))
 
-        #ウインドウ閉じをキャッチ
-        gl.SensorConfWin.protocol('WM_DELETE_WINDOW',SensorConfWincallback)
+            if end <= gl.ChMax:
+                # 次のバッチをイベントループに委ねる（ユーザー操作を都度受け付けるため）
+                gl.SensorConfWin.after(0, _build_batch, end)
+            else:
+                # 全行構築完了後の最終セットアップ
+                gl.SensorConfWin.protocol('WM_DELETE_WINDOW', SensorConfWincallback)
+                # スクロール範囲を確定し、以降の変更に追従するよう<Configure>をバインド
+                gl.app.SensorFrame.bind("<Configure>", lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
 
-        # スクロール範囲を確定し、以降の変更に追従するよう<Configure>をバインド
-        gl.app.SensorFrame.bind("<Configure>",lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
+        # 最初のバッチをイベントループ経由で開始（ウィンドウを即座に操作可能にするため）
+        gl.SensorConfWin.after(0, _build_batch, 1)
 
     else:
         gl.SensorConfWin.lift()
@@ -223,7 +256,7 @@ def ConfClear():
         if not messagebox.askyesno('設定クリア','現在の入力をクリアしますか？') :
             return
     
-    for i in range(1,gl.ChMax+1) :#内容クリア
+    for i in range(1, len(gl.app.SensorCombo)+1) :#内容クリア（バッチ構築中は構築済みの行のみ）
         gl.app.SensorCombo[i-1].set('')
         gl.app.In1Combo[i-1].set('')
         gl.app.In2Combo[i-1].set('')
