@@ -20,6 +20,9 @@ class App(tk.Tk):
         # 呪文
         tk.Tk.__init__(self, *args, **kwargs)
 
+        # ウィジェット構築中は非表示にして描画コストを削減
+        self.withdraw()
+
         # ウィンドウタイトルを決定
         self.title("IO読書")
 
@@ -123,7 +126,6 @@ class App(tk.Tk):
         self.main_frame = tk.Frame(self.canvas, width=gl.winmaxwidth*10, highlightthickness=0)
         self.canvas.create_window(0, 0, window=self.main_frame, anchor="nw")
         self.canvas.config(scrollregion=self.canvas.bbox('all'))  # フレームにフィットするようにキャンバスのスクロール可能範囲を変更
-        self.main_frame.bind("<Configure>", lambda e: self.canvas.config(scrollregion=self.canvas.bbox('all')))
         self.main_frame.bind("<MouseWheel>", lambda event, arg1=self.canvas, arg2=self.main_frame: Bind.mouse_y_scroll(event, arg1, arg2))  # マウスホイール関数をｾｯﾄ
         self.canvas.bind("<MouseWheel>", lambda event: Bind.mouse_y_scroll(event, self.canvas, None))  # キャンバス空白部分のマウスホイール対応
 
@@ -314,6 +316,12 @@ class App(tk.Tk):
 
         #ウインドウ閉じをキャッチ
         self.protocol("WM_DELETE_WINDOW", callback)
+
+        # スクロール範囲を確定し、以降の変更に追従するよう<Configure>をバインド
+        self.main_frame.bind("<Configure>", lambda e: self.canvas.config(scrollregion=self.canvas.bbox('all')))
+
+        # 全ウィジェット構築完了後に表示
+        self.deiconify()
 
 def ConectConfdef():
     ConectConf.ConectConf()  

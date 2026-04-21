@@ -176,10 +176,12 @@ def WinWidthSwitch() :
     if gl.app.WinWidthButton['text'] == "◀" :
         # ウィンドウサイズを縮小してコメント列以降を非表示
         gl.app.WinWidthButton['text'] = "▶"
+        gl.app.changePageButton.grid_remove()
         gl.app.geometry(str(gl.winwidth) + "x" + str(gl.winheight))
     else:
         # ウィンドウサイズを元に戻して全列を表示
         gl.app.WinWidthButton['text'] = "◀"
+        gl.app.changePageButton.grid()
         gl.app.geometry(str(gl.winmaxwidth) + "x" + str(gl.winheight))
 
 

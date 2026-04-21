@@ -18,10 +18,10 @@ def SensorConf() :
 
     if gl.SensorConfWin ==  None or not gl.SensorConfWin.winfo_exists()  :
         gl.SensorConfWin = tk.Toplevel()
+        # ウィジェット構築中は非表示にして描画コストを削減
+        gl.SensorConfWin.withdraw()
         gl.SensorConfWin.geometry(str(winwidth)+"x"+str(winheight))
         gl.SensorConfWin.title("センサー設定")
-        gl.SensorConfWin.grab_set()
-        gl.SensorConfWin.focus_set()
         gl.SensorConfWin.grid_rowconfigure(0, weight=0)
         gl.SensorConfWin.grid_rowconfigure(1, weight=1)
         gl.SensorConfWin.grid_columnconfigure(0, weight=1)
@@ -45,7 +45,6 @@ def SensorConf() :
         gl.app.Sensorcanvas.grid(row=0, column=0, sticky="nsew")
         gl.app.Sensorcanvas.create_window(0,0,window=gl.app.SensorFrame,anchor="nw")#キャンバスにフレーム設置
         gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all'))#フレームにフィットするようにキャンバスのスクロール可能範囲を変更
-        gl.app.SensorFrame.bind("<Configure>",lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
 
         gl.app.Sensorybar = tk.Scrollbar(gl.SensorConfWin,orient=tk.VERTICAL)#縦スクロールバー配置
         gl.app.Sensorybar.grid(row=1,column=1,sticky=tk.N+tk.S)
@@ -199,6 +198,14 @@ def SensorConf() :
 
         #ウインドウ閉じをキャッチ
         gl.SensorConfWin.protocol('WM_DELETE_WINDOW',SensorConfWincallback)
+
+        # スクロール範囲を確定し、以降の変更に追従するよう<Configure>をバインド
+        gl.app.SensorFrame.bind("<Configure>",lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
+
+        # 全ウィジェット構築完了後に表示・グラブ
+        gl.SensorConfWin.deiconify()
+        gl.SensorConfWin.grab_set()
+        gl.SensorConfWin.focus_set()
     else:
         gl.SensorConfWin.lift()
         gl.SensorConfWin.focus_set()
