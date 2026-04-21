@@ -1,5 +1,4 @@
 
-from telnetlib import theNULL
 from tkinter import messagebox
 import socket
 import inspect
@@ -29,7 +28,7 @@ def Test():
                 #IPとPORT未入力ﾁｪｯｸ
                 Flag = False
                 for i in range(1,gl.DeviceMax+1):
-                    if gl.DeviceConfDic[i-1]['Device'] != "" and not gl.DeviceList[3] :
+                    if gl.DeviceConfDic[i-1]['Device'] != "" and gl.DeviceConfDic[i-1]['Device'] != gl.DeviceList[3] :
                         if gl.DeviceConfDic[i-1]['IPAddress'] == "":
                             Flag = True
                         if gl.DeviceConfDic[i-1]['Port'] == "":
@@ -86,7 +85,7 @@ def Test():
                     try:
                         if client.connect_ex((host, port)) == 0 :#正常通信
                             Result = Result + 'デバイスNo'+ str(i) + ' : 接続OK\n'
-                            client.close
+                            client.close()
                         else :
                             Result = Result + 'デバイスNo'+ str(i) + ' : 接続NG\nIP,PORT,パソコンの設定,LANの確認をしてください。\n'
                     except KeyboardInterrupt :#ﾌﾟﾛｸﾞﾗﾑｷｬﾝｾﾙ時

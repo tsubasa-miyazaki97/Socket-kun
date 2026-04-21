@@ -123,10 +123,8 @@ def IORW():
 
                 RWThread[i-1].start()
             
-        ### スレッド作成（フォームに値反映）
-        thread2 = threading.Thread(target=ValueUpdate, daemon=True)
-        ### スレッド開始
-        thread2.start()
+        ### フォームへの値反映をメインスレッドで実行
+        gl.app.after(0, ValueUpdate)
 
     else :
         gl.IORWBusy = False
@@ -183,7 +181,7 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
             asyncio.set_event_loop(loop)
             try :
                 loop.run_until_complete(client.connect())
-            except :
+            except Exception as e:
                 print(f"接続エラー: {e}")
                 
             objects = client.get_objects_node()
@@ -214,7 +212,8 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
                 ns_index = list(user_ns_candidates)[0]
                 print("選択された ns_index:", ns_index)
             else :
-                sys.exit("変数が見つかりません")
+                messagebox.showinfo('エラー', '変数が見つかりません')
+                return
             ReadCommand = Command.get_node(client,ReadCommand,ns_index,False)
                 
         
@@ -275,8 +274,12 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
         
         if gl.DeviceConfDic[DeviceNo]['Device'] != "ﾀﾞﾐｰ(接続先無)":#Dummy以外処理 :
             if gl.DeviceConfDic[DeviceNo]['Device'] != gl.DeviceList[4] :#Socket
-                client.send(ReadCommand)
-                Response = client.recv(1024)
+                try:
+                    client.send(ReadCommand)
+                    Response = client.recv(1024)
+                except (socket.timeout, ConnectionResetError, OSError) as e:
+                    messagebox.showinfo('通信エラー', f'デバイスNo{DeviceNo+1}との通信が切断されました。\n({e})')
+                    break
                 if not Command.ValueCheck(Response)  :
                     messagebox.showinfo('レスポンスエラー3','読込結果がエラーでした。宮崎に言ってください') 
                     return
@@ -303,9 +306,12 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
         
             if WriteCommand != '':
                 if gl.DeviceConfDic[DeviceNo]['Device'] != gl.DeviceList[4] :#Socket
-                    client.send(WriteCommand)
-                    Response = client.recv(1024)
-                
+                    try:
+                        client.send(WriteCommand)
+                        Response = client.recv(1024)
+                    except (socket.timeout, ConnectionResetError, OSError) as e:
+                        messagebox.showinfo('通信エラー', f'デバイスNo{DeviceNo+1}との通信が切断されました。\n({e})')
+                        break
                     if not Command.ValueCheck(Response)  :
                         messagebox.showinfo('レスポンスエラー4','書込結果がエラーでした。宮崎に言ってください') 
                         return
@@ -329,44 +335,45 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
         now = time.time()
         if int(gl.app.Periodcombo.get())-1 == DeviceNo :
             gl.app.ScanTime['text']=gl.Period[DeviceNo]
-        #待ち
-        time.sleep(0.000001)#ループ早すぎると固まる
+        #待ち(他スレッドへ処理を譲る: sleep(0)でGILを解放)
+        time.sleep(0)
     
     if gl.DeviceConfDic[DeviceNo]['Device'] != "ﾀﾞﾐｰ(接続先無)":#Dummy以外処理 :
         #終了後の処理
         if gl.DeviceConfDic[DeviceNo]['Device'] != gl.DeviceList[4] :#Socket
-            client.close
+            client.close()
         elif gl.DeviceConfDic[DeviceNo]['Device'] == gl.DeviceList[4] :#OPCUA
             loop.run_until_complete(client.disconnect())
     
 
 def ValueUpdate():
-    while gl.IORWBusy:
-        ## ﾌｫｰﾑの値変更
-        for i in gl.EnableCh:
-            if gl.app.DeviceNoCombo[i-1].get() != '':
-                if gl.ValueText[i-1] != gl.AllAddDic[int(gl.app.DeviceNoCombo[i-1].get())-1][gl.app.AddressText[i-1].get()]['RVal'] :
-                    if not gl.ValueTextFocus[i-1] :
-                        gl.ValueText[i-1].set(gl.AllAddDic[int(gl.app.DeviceNoCombo[i-1].get())-1][gl.app.AddressText[i-1].get()]['RVal'])
-        time.sleep(0.000001)
+    if not gl.IORWBusy:
+        return
+    ## ﾌｫｰﾑの値変更
+    for i in gl.EnableCh:
+        if gl.app.DeviceNoCombo[i-1].get() != '':
+            if gl.ValueText[i-1] != gl.AllAddDic[int(gl.app.DeviceNoCombo[i-1].get())-1][gl.app.AddressText[i-1].get()]['RVal'] :
+                if not gl.ValueTextFocus[i-1] :
+                    gl.ValueText[i-1].set(gl.AllAddDic[int(gl.app.DeviceNoCombo[i-1].get())-1][gl.app.AddressText[i-1].get()]['RVal'])
+    gl.app.after(16, ValueUpdate)  # 約60fps(16ms)でUIを更新
 
 
 def SensorCorrect(now):
     
-    for i in range(gl.ChMax):
-        if not gl.SensorConfDic[i]['Disable'] :
-            if gl.SensorConfDic[i]['Sensor'] == gl.SensorList[0] :
-                SenProc.EdgeSensor(i,now)
-            elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[1] or gl.SensorConfDic[i]['Sensor'] == gl.SensorList[2] :
-                SenProc.Dancer(i,gl.SensorConfDic[i]['Sensor'] == gl.SensorList[2],now)
-            elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[3] or gl.SensorConfDic[i]['Sensor'] == gl.SensorList[4] :
-                SenProc.TensionMeter(i,gl.SensorConfDic[i]['Sensor'] == gl.SensorList[4],now)
-            elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[5] :
-                SenProc.DiameterSensor(i,now)
-            elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[6] :
-                SenProc.Equal(i,now)
-            elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[7] :
-                SenProc.BitCalcOut(i,now)
+    for idx in gl.EnableSensor:
+        i = idx - 1  # 0-based index
+        if gl.SensorConfDic[i]['Sensor'] == gl.SensorList[0] :
+            SenProc.EdgeSensor(i,now)
+        elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[1] or gl.SensorConfDic[i]['Sensor'] == gl.SensorList[2] :
+            SenProc.Dancer(i,gl.SensorConfDic[i]['Sensor'] == gl.SensorList[2],now)
+        elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[3] or gl.SensorConfDic[i]['Sensor'] == gl.SensorList[4] :
+            SenProc.TensionMeter(i,gl.SensorConfDic[i]['Sensor'] == gl.SensorList[4],now)
+        elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[5] :
+            SenProc.DiameterSensor(i,now)
+        elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[6] :
+            SenProc.Equal(i,now)
+        elif gl.SensorConfDic[i]['Sensor'] == gl.SensorList[7] :
+            SenProc.BitCalcOut(i,now)
 
 def BackUp():
     #変数に値格納
@@ -400,9 +407,9 @@ def EnableCheck():
                 messagebox.showinfo('エラー','Ch'+str(i+1)+'のデータ型が入力されていません。') 
                 return
             if True in [gl.IOConfDic[i]['AI0']=='',gl.IOConfDic[i]['AI100']=='',\
-                        gl.IOConfDic[i]['User0']=='',gl.IOConfDic[i]['AI0']==''] :
+                        gl.IOConfDic[i]['User0']=='',gl.IOConfDic[i]['User100']==''] :
                 if False in [gl.IOConfDic[i]['AI0']=='',gl.IOConfDic[i]['AI100']=='',\
-                        gl.IOConfDic[i]['User0']=='',gl.IOConfDic[i]['AI0']==''] :
+                        gl.IOConfDic[i]['User0']=='',gl.IOConfDic[i]['User100']==''] :
                     messagebox.showinfo('エラー','Ch'+str(i+1)+'のAI値User値の入力がまばらです。\n削除または入力してください。') 
                     return
                     

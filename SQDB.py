@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import TCPGlobalVar as gl
 import ConectConfWin as ConectConf
@@ -9,7 +10,7 @@ sqlite3.register_converter('BOOL', lambda l: bool(eval(l.capitalize())))
 def DBConnect():
     
     #DB作成、接続(このパス先に保存)
-    gl.Conn = sqlite3.connect(gl.MyPath + '\IODB.db', detect_types=sqlite3.PARSE_DECLTYPES)
+    gl.Conn = sqlite3.connect(os.path.join(gl.MyPath, 'IODB.db'), detect_types=sqlite3.PARSE_DECLTYPES)
     gl.Conn.row_factory = DictFactory
     gl.Cur=gl.Conn.cursor()
 

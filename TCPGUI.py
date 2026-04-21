@@ -48,6 +48,7 @@ class App(tk.Tk):
         self.canvas.grid(row=0,column=0,sticky="nsew")
         self.canvas.create_window(0,0,window=self.main_frame,anchor="nw")
         self.canvas.config(scrollregion=self.canvas.bbox('all'))#フレームにフィットするようにキャンバスのスクロール可能範囲を変更
+        self.main_frame.bind("<Configure>",lambda e: self.canvas.config(scrollregion=self.canvas.bbox('all')))
 
         self.ybar = tk.Scrollbar(self,orient=tk.VERTICAL)#縦スクロールバー配置
         self.ybar.grid(row=0,column=1,sticky=tk.N+tk.S)

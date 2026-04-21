@@ -34,6 +34,7 @@ def SensorConf() :
     gl.app.Sensorcanvas.grid(row=0,column=0)
     gl.app.Sensorcanvas.create_window(0,0,window=gl.app.SensorFrame)#キャンバスにフレーム設置
     gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all'))#フレームにフィットするようにキャンバスのスクロール可能範囲を変更
+    gl.app.SensorFrame.bind("<Configure>",lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
 
     gl.app.Sensorybar = tk.Scrollbar(gl.SensorConfWin,orient=tk.VERTICAL)#縦スクロールバー配置
     gl.app.Sensorybar.grid(row=0,column=1,sticky=tk.N+tk.S)
@@ -70,8 +71,7 @@ def SensorConf() :
     for i in range(1,gl.ChMax+1) :
         gl.app.SensorCombo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.SensorList, font=(deffont, fsizes),width=8))
         gl.app.SensorCombo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.SensorCombo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.SensorCombo[i-1],arg2=gl.SensorList:Bind.ComboChange(event,arg1,arg2))
-        gl.app.SensorCombo[i-1].bind('<FocusOut>',lambda event,arg1=gl.SensorList,arg2=i-1:SensorSelect(event,arg1,arg2))
+        gl.app.SensorCombo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.SensorCombo[i-1],arg2=gl.SensorList,arg3=i-1: (Bind.ComboChange(event,arg1,arg2), SensorSelect(event,arg2,arg3)))
         gl.app.SensorCombo[i-1].bind("<<ComboboxSelected>>",lambda event,arg1=gl.SensorList,arg2=i-1:SensorSelect(event,arg1,arg2))
     col += 90
     #入力1Ch

@@ -24,7 +24,7 @@ def TraceStart():
     if gl.app.Tracecombo.get() != gl.TraceTime[0] :
         ScanTime=int(gl.app.Tracecombo.get())
     now = time.time()
-    gl.TraceDic.clear
+    gl.TraceDic.clear()
     RowCnt = 0
     Key=['Row','Time']
 
