@@ -181,6 +181,9 @@ def WinWidthSwitch() :
         gl.app.IOClearConfButton.grid_remove()
         gl.app.ExportButton.grid_remove()
         gl.app.InportButton.grid_remove()
+        gl.app.VarTypeLabel.grid_remove()
+        for combo in gl.app.VarTypecombo:
+            combo.grid_remove()
         gl.app.geometry(str(gl.winwidth) + "x" + str(gl.winheight))
     else:
         # ウィンドウサイズを元に戻して全列を表示
@@ -190,6 +193,9 @@ def WinWidthSwitch() :
         gl.app.IOClearConfButton.grid()
         gl.app.ExportButton.grid()
         gl.app.InportButton.grid()
+        gl.app.VarTypeLabel.grid()
+        for combo in gl.app.VarTypecombo:
+            combo.grid()
         gl.app.geometry(str(gl.winmaxwidth) + "x" + str(gl.winheight))
 
 
