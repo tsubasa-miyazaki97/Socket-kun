@@ -43,13 +43,13 @@ def Test():
                             if len(IPCheck) == 4:#IP異常検知
                                 Flag = False
                                 for j in range(1,5) :
-                                    if not IPCheck[i-1].isdecimal() :
+                                    if not IPCheck[j-1].isdecimal() :
                                         Flag = True 
                                 if Flag == True :
                                     messagebox.showinfo('Error','IPアドレスが不正な値です。\n正しい値を入力してください。')
                                     break
                                 for j in range(1,5) :
-                                    if int(IPCheck[i-1]) < 0 or int(IPCheck[i-1]) > 255 :
+                                    if int(IPCheck[j-1]) < 0 or int(IPCheck[j-1]) > 255 :
                                         Flag = True
                                 if Flag == True :
                                     messagebox.showinfo('Error','IPアドレスが不正な値です。\n正しい値を入力してください。')
@@ -101,7 +101,7 @@ def Test():
 
                     url = f"opc.tcp://{host}:{port}/"
                     client = Client(url=url)
-                    loop = asyncio.get_event_loop()
+                    loop = asyncio.new_event_loop()
                     try:
                         loop.run_until_complete(client.connect())
                         Result = Result + 'デバイスNo'+ str(i) + ' : 接続OK\n'

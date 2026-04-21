@@ -61,10 +61,10 @@ def TraceStart():
     if CSVPath == '':
         return
     try:
-        CSVFile = open(CSVPath,'w',newline="")
-        CSVwriter = csv.DictWriter(CSVFile,Key)#,delimiter='\t')
-        CSVwriter.writeheader()
-        CSVwriter.writerows(gl.TraceDic)
-    except:
+        with open(CSVPath,'w',newline="") as CSVFile:
+            CSVwriter = csv.DictWriter(CSVFile,Key)#,delimiter='\t')
+            CSVwriter.writeheader()
+            CSVwriter.writerows(gl.TraceDic)
+    except Exception:
         messagebox.showinfo('エラー','保存できませんでした。')
 
