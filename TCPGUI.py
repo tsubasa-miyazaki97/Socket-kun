@@ -125,6 +125,7 @@ class App(tk.Tk):
         self.canvas.config(scrollregion=self.canvas.bbox('all'))  # フレームにフィットするようにキャンバスのスクロール可能範囲を変更
         self.main_frame.bind("<Configure>", lambda e: self.canvas.config(scrollregion=self.canvas.bbox('all')))
         self.main_frame.bind("<MouseWheel>", lambda event, arg1=self.canvas, arg2=self.main_frame: Bind.mouse_y_scroll(event, arg1, arg2))  # マウスホイール関数をｾｯﾄ
+        self.canvas.bind("<MouseWheel>", lambda event: Bind.mouse_y_scroll(event, self.canvas, None))  # キャンバス空白部分のマウスホイール対応
 
 #-----------------------------------列定数---------------------------------
 
