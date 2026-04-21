@@ -19,70 +19,73 @@ def ConectConf() :
         gl.ConectConfWin.grab_set()
         gl.ConectConfWin.focus_set()
 #-----------------------------------------
-    #DeviceList=["PC10G","MP"]
+        #DeviceList=["PC10G","MP"]
 
-    f1frow = 80
-    f1fcol = 50
-    f1row = 40
-    f1col = 100
+        f1frow = 80
+        f1fcol = 50
+        f1row = 40
+        f1col = 100
 
-    # 接続テストボタン
-    gl.app.Testbutton = tk.Button(gl.ConectConfWin, text="接続テスト", command=lambda : ConectTestdef())
-    gl.app.Testbutton.place(x=260,y=0)
-    # ﾃﾞﾌｫﾙﾄ設定ボタン   
-    gl.app.Defbutton = tk.Button(gl.ConectConfWin, text="デフォルト設定", command=lambda : DefConf())
-    gl.app.Defbutton.place(x=460,y=0)
-    # 設定クリアボタン
-    gl.app.ConfClearbutton = tk.Button(gl.ConectConfWin, text="設定クリア", command=lambda : ConfClear())
-    gl.app.ConfClearbutton.place(x=660,y=0)
+        # 接続テストボタン
+        gl.app.Testbutton = tk.Button(gl.ConectConfWin, text="接続テスト", command=lambda : ConectTestdef())
+        gl.app.Testbutton.place(x=260,y=0)
+        # ﾃﾞﾌｫﾙﾄ設定ボタン   
+        gl.app.Defbutton = tk.Button(gl.ConectConfWin, text="デフォルト設定", command=lambda : DefConf())
+        gl.app.Defbutton.place(x=460,y=0)
+        # 設定クリアボタン
+        gl.app.ConfClearbutton = tk.Button(gl.ConectConfWin, text="設定クリア", command=lambda : ConfClear())
+        gl.app.ConfClearbutton.place(x=660,y=0)
 
-    #ﾃﾞﾊﾞｲｽNo
-    gl.app.DeviceNoLabel = tk.Label(gl.ConectConfWin, text="デバイスNo", font=(deffont, fsizes))
-    gl.app.DeviceNoLabel.place(x=f1fcol-f1fcol/2,y=f1frow)
+        #ﾃﾞﾊﾞｲｽNo
+        gl.app.DeviceNoLabel = tk.Label(gl.ConectConfWin, text="デバイスNo", font=(deffont, fsizes))
+        gl.app.DeviceNoLabel.place(x=f1fcol-f1fcol/2,y=f1frow)
 
-    gl.app.Nolabel=[]
-    for i in range(1,gl.DeviceMax+1) :
-        gl.app.Nolabel.insert(i,tk.Label(gl.ConectConfWin, text=i , font=(deffont,fsizes)))
-        gl.app.Nolabel[i-1].place(x=f1fcol,y=i*f1row+f1frow)
+        gl.app.Nolabel=[]
+        for i in range(1,gl.DeviceMax+1) :
+            gl.app.Nolabel.insert(i,tk.Label(gl.ConectConfWin, text=i , font=(deffont,fsizes)))
+            gl.app.Nolabel[i-1].place(x=f1fcol,y=i*f1row+f1frow)
 
-    #接続機器
-    gl.app.DeviceLabel = tk.Label(gl.ConectConfWin, text="接続機器", font=(deffont, fsizes))
-    gl.app.DeviceLabel.place(x=f1fcol+f1col,y=f1frow)
+        #接続機器
+        gl.app.DeviceLabel = tk.Label(gl.ConectConfWin, text="接続機器", font=(deffont, fsizes))
+        gl.app.DeviceLabel.place(x=f1fcol+f1col,y=f1frow)
 
-    gl.app.DeviceCombo=[]
-    for i in range(1,gl.DeviceMax+1) :
-        gl.app.DeviceCombo.insert(i, ttk.Combobox(gl.ConectConfWin,values=gl.DeviceList, font=(deffont, fsizes)))
-        gl.app.DeviceCombo[i-1].place(x=f1fcol+f1col,y=i*f1row+f1frow)
-        gl.app.DeviceCombo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.DeviceCombo[i-1],arg2=gl.DeviceList:Bind.ComboChange(event,arg1,arg2))
+        gl.app.DeviceCombo=[]
+        for i in range(1,gl.DeviceMax+1) :
+            gl.app.DeviceCombo.insert(i, ttk.Combobox(gl.ConectConfWin,values=gl.DeviceList, font=(deffont, fsizes)))
+            gl.app.DeviceCombo[i-1].place(x=f1fcol+f1col,y=i*f1row+f1frow)
+            gl.app.DeviceCombo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.DeviceCombo[i-1],arg2=gl.DeviceList:Bind.ComboChange(event,arg1,arg2))
 
-    #IPｱﾄﾞﾚｽ
-    gl.app.IPLabel = tk.Label(gl.ConectConfWin, text="IPアドレス", font=(deffont, fsizes))
-    gl.app.IPLabel.place(x=f1fcol+f1col*3,y=f1frow)
+        #IPｱﾄﾞﾚｽ
+        gl.app.IPLabel = tk.Label(gl.ConectConfWin, text="IPアドレス", font=(deffont, fsizes))
+        gl.app.IPLabel.place(x=f1fcol+f1col*3,y=f1frow)
 
-    gl.app.IPText=[]
-    for i in range(1,gl.DeviceMax+1) :
+        gl.app.IPText=[]
+        for i in range(1,gl.DeviceMax+1) :
 
-        gl.app.IPText.insert(i,tk.Entry(gl.ConectConfWin, font=(deffont, fsizes)))
-        gl.app.IPText[i-1].place(x=f1fcol+f1col*3,y=i*f1row+f1frow)
+            gl.app.IPText.insert(i,tk.Entry(gl.ConectConfWin, font=(deffont, fsizes)))
+            gl.app.IPText[i-1].place(x=f1fcol+f1col*3,y=i*f1row+f1frow)
 
-    #PORT
-    gl.app.PortLabel = tk.Label(gl.ConectConfWin, text="PORT", font=(deffont, fsizes))
-    gl.app.PortLabel.place(x=f1fcol+f1col*5,y=f1frow)
+        #PORT
+        gl.app.PortLabel = tk.Label(gl.ConectConfWin, text="PORT", font=(deffont, fsizes))
+        gl.app.PortLabel.place(x=f1fcol+f1col*5,y=f1frow)
 
-    gl.app.PortText=[]
-    for i in range(1,gl.DeviceMax+1) :
-        gl.app.PortText.insert(i,tk.Entry(gl.ConectConfWin,text = '',font=(deffont, fsizes)))
-        gl.app.PortText[i-1].place(x=f1fcol+f1col*5,y=i*f1row+f1frow)
-        gl.app.PortText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.PortText[i-1]:Bind.TextUIntCheck(event,arg1))
-    
-    #各ウィジェットに文字反映
-    for i in range(gl.DeviceMax) :
-        gl.app.DeviceCombo[i].set(gl.DeviceConfDic[i]['Device'])
-        gl.app.IPText[i].insert(tk.END,gl.DeviceConfDic[i]['IPAddress'])
-        gl.app.PortText[i].insert(tk.END,gl.DeviceConfDic[i]['Port'])
-    
-    #ウインドウ閉じをキャッチ
-    gl.ConectConfWin.protocol('WM_DELETE_WINDOW',ConectConfWincallback)
+        gl.app.PortText=[]
+        for i in range(1,gl.DeviceMax+1) :
+            gl.app.PortText.insert(i,tk.Entry(gl.ConectConfWin,text = '',font=(deffont, fsizes)))
+            gl.app.PortText[i-1].place(x=f1fcol+f1col*5,y=i*f1row+f1frow)
+            gl.app.PortText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.PortText[i-1]:Bind.TextUIntCheck(event,arg1))
+        
+        #各ウィジェットに文字反映
+        for i in range(gl.DeviceMax) :
+            gl.app.DeviceCombo[i].set(gl.DeviceConfDic[i]['Device'])
+            gl.app.IPText[i].insert(tk.END,gl.DeviceConfDic[i]['IPAddress'])
+            gl.app.PortText[i].insert(tk.END,gl.DeviceConfDic[i]['Port'])
+        
+        #ウインドウ閉じをキャッチ
+        gl.ConectConfWin.protocol('WM_DELETE_WINDOW',ConectConfWincallback)
+    else:
+        gl.ConectConfWin.lift()
+        gl.ConectConfWin.focus_set()
 #-----------------------------------------
 
 def BackUp():

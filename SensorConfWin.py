@@ -25,198 +25,201 @@ def SensorConf() :
         gl.SensorConfWin.grid_rowconfigure(0, weight=1)
         gl.SensorConfWin.grid_columnconfigure(0, weight=1)
 
-    gl.app.Sensormainm_frame = tk.Frame(gl.SensorConfWin)#切替用ﾌﾚｰﾑ
-    gl.app.Sensormainm_frame.grid(row=0, column=0)
-    #スクロールバー設置
-    gl.app.Sensorcanvas = tk.Canvas(gl.app.Sensormainm_frame,width=winwidth,height=winheight)#スクロールバー置けるウィジェット(キャンバス)配置
+        gl.app.Sensormainm_frame = tk.Frame(gl.SensorConfWin)#切替用ﾌﾚｰﾑ
+        gl.app.Sensormainm_frame.grid(row=0, column=0)
+        #スクロールバー設置
+        gl.app.Sensorcanvas = tk.Canvas(gl.app.Sensormainm_frame,width=winwidth,height=winheight)#スクロールバー置けるウィジェット(キャンバス)配置
 
-    gl.app.SensorFrame = tk.Frame(gl.app.Sensorcanvas,width=winwidth,height=30.6*gl.ChMax)#キャンバス上にﾌﾚｰﾑ設置
-    gl.app.Sensorcanvas.grid(row=0,column=0)
-    gl.app.Sensorcanvas.create_window(0,0,window=gl.app.SensorFrame)#キャンバスにフレーム設置
-    gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all'))#フレームにフィットするようにキャンバスのスクロール可能範囲を変更
-    gl.app.SensorFrame.bind("<Configure>",lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
+        gl.app.SensorFrame = tk.Frame(gl.app.Sensorcanvas,width=winwidth,height=30.6*gl.ChMax)#キャンバス上にﾌﾚｰﾑ設置
+        gl.app.Sensorcanvas.grid(row=0,column=0)
+        gl.app.Sensorcanvas.create_window(0,0,window=gl.app.SensorFrame)#キャンバスにフレーム設置
+        gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all'))#フレームにフィットするようにキャンバスのスクロール可能範囲を変更
+        gl.app.SensorFrame.bind("<Configure>",lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
 
-    gl.app.Sensorybar = tk.Scrollbar(gl.SensorConfWin,orient=tk.VERTICAL)#縦スクロールバー配置
-    gl.app.Sensorybar.grid(row=0,column=1,sticky=tk.N+tk.S)
-    gl.app.Sensorybar.config(command=gl.app.Sensorcanvas.yview)#縦スクロール用ｺﾏﾝﾄﾞ
-    gl.app.Sensorcanvas.config(yscrollcommand=gl.app.Sensorybar.set)#キャンバスにスクロールバーの動きを反映
-    gl.app.Sensorcanvas.yview_moveto(0)#キャンバスのスクロールを初期化
-    gl.app.SensorFrame.bind("<MouseWheel>",lambda event,arg1=gl.app.Sensorcanvas,arg2=gl.app.SensorFrame: Bind.mouse_y_scroll(event,arg1,arg2))#マウスホイール関数をﾌﾚｰﾑにｾｯﾄ
-        
-    #背景ﾗﾍﾞﾙ
-    gl.app.BGlabel = tk.Label(gl.app.Sensorcanvas,text='',font=(deffont, fsizes),width=winwidth,height=3)
-    gl.app.BGlabel.place(x=0,y=0)
-    # 設定クリアボタン
-    gl.app.ConfClearbutton = tk.Button(gl.SensorConfWin, text="設定クリア", command=lambda : ConfClear())
-    gl.app.ConfClearbutton.place(x=660,y=0)
+        gl.app.Sensorybar = tk.Scrollbar(gl.SensorConfWin,orient=tk.VERTICAL)#縦スクロールバー配置
+        gl.app.Sensorybar.grid(row=0,column=1,sticky=tk.N+tk.S)
+        gl.app.Sensorybar.config(command=gl.app.Sensorcanvas.yview)#縦スクロール用ｺﾏﾝﾄﾞ
+        gl.app.Sensorcanvas.config(yscrollcommand=gl.app.Sensorybar.set)#キャンバスにスクロールバーの動きを反映
+        gl.app.Sensorcanvas.yview_moveto(0)#キャンバスのスクロールを初期化
+        gl.app.SensorFrame.bind("<MouseWheel>",lambda event,arg1=gl.app.Sensorcanvas,arg2=gl.app.SensorFrame: Bind.mouse_y_scroll(event,arg1,arg2))#マウスホイール関数をﾌﾚｰﾑにｾｯﾄ
+            
+        #背景ﾗﾍﾞﾙ
+        gl.app.BGlabel = tk.Label(gl.app.Sensorcanvas,text='',font=(deffont, fsizes),width=winwidth,height=3)
+        gl.app.BGlabel.place(x=0,y=0)
+        # 設定クリアボタン
+        gl.app.ConfClearbutton = tk.Button(gl.SensorConfWin, text="設定クリア", command=lambda : ConfClear())
+        gl.app.ConfClearbutton.place(x=660,y=0)
 #-----------------------------------------
 
-    f1frow = 30
-    f1fcol = 20
-    row = 30
-    col = 20
+        f1frow = 30
+        f1fcol = 20
+        row = 30
+        col = 20
 
-    # Noラベル
-    gl.app.SensorLabel = tk.Label(gl.SensorConfWin, text="No", font=(deffont, fsizes))
-    gl.app.SensorLabel.place(x=f1fcol,y=f1frow)
-    gl.app.SensorNolabel=[]
-    for i in range(1,gl.ChMax+1) :
-        gl.app.SensorNolabel.insert(i,tk.Label(gl.app.SensorFrame, text=i , font=(deffont,fsizes)))
-        gl.app.SensorNolabel[i-1].place(x=f1fcol,y=i*row+f1frow)
-        
-    #ｾﾝｻ種類
-    gl.app.SensorLabel = tk.Label(gl.SensorConfWin, text="ｾﾝｻ種", font=(deffont, fsizes))
-    gl.app.SensorLabel.place(x=f1fcol+col,y=f1frow)
-    gl.app.SensorCombo=[]
-    for i in range(1,gl.ChMax+1) :
-        gl.app.SensorCombo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.SensorList, font=(deffont, fsizes),width=8))
-        gl.app.SensorCombo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.SensorCombo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.SensorCombo[i-1],arg2=gl.SensorList,arg3=i-1: (Bind.ComboChange(event,arg1,arg2), SensorSelect(event,arg2,arg3)))
-        gl.app.SensorCombo[i-1].bind("<<ComboboxSelected>>",lambda event,arg1=gl.SensorList,arg2=i-1:SensorSelect(event,arg1,arg2))
-    col += 90
-    #入力1Ch
-    gl.app.In1Label = tk.Label(gl.SensorConfWin, text="Ch1", font=(deffont, fsizes))
-    gl.app.In1Label.place(x=f1fcol+col,y=f1frow)
-    gl.app.In1Combo=[]
-    for i in range(1,gl.ChMax+1) :
-        gl.app.In1Combo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.EnableCh, font=(deffont, fsizes),width=3))
-        gl.app.In1Combo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.In1Combo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.In1Combo[i-1],arg2=gl.EnableCh:Bind.ComboChange(event,arg1,arg2))
+        # Noラベル
+        gl.app.SensorLabel = tk.Label(gl.SensorConfWin, text="No", font=(deffont, fsizes))
+        gl.app.SensorLabel.place(x=f1fcol,y=f1frow)
+        gl.app.SensorNolabel=[]
+        for i in range(1,gl.ChMax+1) :
+            gl.app.SensorNolabel.insert(i,tk.Label(gl.app.SensorFrame, text=i , font=(deffont,fsizes)))
+            gl.app.SensorNolabel[i-1].place(x=f1fcol,y=i*row+f1frow)
+            
+        #ｾﾝｻ種類
+        gl.app.SensorLabel = tk.Label(gl.SensorConfWin, text="ｾﾝｻ種", font=(deffont, fsizes))
+        gl.app.SensorLabel.place(x=f1fcol+col,y=f1frow)
+        gl.app.SensorCombo=[]
+        for i in range(1,gl.ChMax+1) :
+            gl.app.SensorCombo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.SensorList, font=(deffont, fsizes),width=8))
+            gl.app.SensorCombo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.SensorCombo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.SensorCombo[i-1],arg2=gl.SensorList,arg3=i-1: (Bind.ComboChange(event,arg1,arg2), SensorSelect(event,arg2,arg3)))
+            gl.app.SensorCombo[i-1].bind("<<ComboboxSelected>>",lambda event,arg1=gl.SensorList,arg2=i-1:SensorSelect(event,arg1,arg2))
+        col += 90
+        #入力1Ch
+        gl.app.In1Label = tk.Label(gl.SensorConfWin, text="Ch1", font=(deffont, fsizes))
+        gl.app.In1Label.place(x=f1fcol+col,y=f1frow)
+        gl.app.In1Combo=[]
+        for i in range(1,gl.ChMax+1) :
+            gl.app.In1Combo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.EnableCh, font=(deffont, fsizes),width=3))
+            gl.app.In1Combo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.In1Combo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.In1Combo[i-1],arg2=gl.EnableCh:Bind.ComboChange(event,arg1,arg2))
 
-    col += 60
-    #入力2Ch
-    gl.app.In2Label = tk.Label(gl.SensorConfWin, text="Ch2", font=(deffont, fsizes))
-    gl.app.In2Label.place(x=f1fcol+col,y=f1frow)
-    gl.app.In2Combo=[]
-    for i in range(1,gl.ChMax+1) :
-        gl.app.In2Combo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.EnableCh, font=(deffont, fsizes),width=3))
-        gl.app.In2Combo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.In2Combo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.In2Combo[i-1],arg2=gl.EnableCh:Bind.ComboChange(event,arg1,arg2))
+        col += 60
+        #入力2Ch
+        gl.app.In2Label = tk.Label(gl.SensorConfWin, text="Ch2", font=(deffont, fsizes))
+        gl.app.In2Label.place(x=f1fcol+col,y=f1frow)
+        gl.app.In2Combo=[]
+        for i in range(1,gl.ChMax+1) :
+            gl.app.In2Combo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.EnableCh, font=(deffont, fsizes),width=3))
+            gl.app.In2Combo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.In2Combo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.In2Combo[i-1],arg2=gl.EnableCh:Bind.ComboChange(event,arg1,arg2))
 
-    col += 60
-    #出力1Ch
-    gl.app.Out1Label = tk.Label(gl.SensorConfWin, text="Ch3", font=(deffont, fsizes))
-    gl.app.Out1Label.place(x=f1fcol+col,y=f1frow)
-    gl.app.Out1Combo=[]
-    for i in range(1,gl.ChMax+1) :
-        gl.app.Out1Combo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.EnableCh, font=(deffont, fsizes),width=3))
-        gl.app.Out1Combo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.Out1Combo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.Out1Combo[i-1],arg2=gl.EnableCh:Bind.ComboChange(event,arg1,arg2))
+        col += 60
+        #出力1Ch
+        gl.app.Out1Label = tk.Label(gl.SensorConfWin, text="Ch3", font=(deffont, fsizes))
+        gl.app.Out1Label.place(x=f1fcol+col,y=f1frow)
+        gl.app.Out1Combo=[]
+        for i in range(1,gl.ChMax+1) :
+            gl.app.Out1Combo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.EnableCh, font=(deffont, fsizes),width=3))
+            gl.app.Out1Combo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.Out1Combo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.Out1Combo[i-1],arg2=gl.EnableCh:Bind.ComboChange(event,arg1,arg2))
 
-    col += 60
-    #出力2Ch
-    gl.app.Out2Label = tk.Label(gl.SensorConfWin, text="Ch4", font=(deffont, fsizes))
-    gl.app.Out2Label.place(x=f1fcol+col,y=f1frow)
-    gl.app.Out2Combo=[]
-    for i in range(1,gl.ChMax+1) :
-        gl.app.Out2Combo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.EnableCh, font=(deffont, fsizes),width=3))
-        gl.app.Out2Combo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.Out2Combo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.Out2Combo[i-1],arg2=gl.EnableCh:Bind.ComboChange(event,arg1,arg2))
+        col += 60
+        #出力2Ch
+        gl.app.Out2Label = tk.Label(gl.SensorConfWin, text="Ch4", font=(deffont, fsizes))
+        gl.app.Out2Label.place(x=f1fcol+col,y=f1frow)
+        gl.app.Out2Combo=[]
+        for i in range(1,gl.ChMax+1) :
+            gl.app.Out2Combo.insert(i, ttk.Combobox(gl.app.SensorFrame,values=gl.EnableCh, font=(deffont, fsizes),width=3))
+            gl.app.Out2Combo[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.Out2Combo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.Out2Combo[i-1],arg2=gl.EnableCh:Bind.ComboChange(event,arg1,arg2))
 
-    col += 60
-    #出力1方向
-    gl.app.Out1InvLabel = tk.Label(gl.SensorConfWin, text="出力1\n反転", font=(deffont, fsizes))
-    gl.app.Out1InvLabel.place(x=f1fcol+col,y=f1frow-15)
-    col += 10
-    gl.app.Out1InvCheck=[]
-    gl.app.Out1InvVal = []
-    for i in range(1,gl.ChMax+1) :
-        gl.app.Out1InvVal.insert(i,tk.BooleanVar())
-        gl.app.Out1InvCheck.insert(i, ttk.Checkbutton(gl.app.SensorFrame,variable=gl.app.Out1InvVal[i-1]))
-        gl.app.Out1InvCheck[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        
-    col += 30
-    #出力2方向反転
-    gl.app.Out2InvLabel = tk.Label(gl.SensorConfWin, text="出力2\n反転", font=(deffont, fsizes))
-    gl.app.Out2InvLabel.place(x=f1fcol+col,y=f1frow-15)
-    col += 10
-    gl.app.Out2InvCheck=[]
-    gl.app.Out2InvVal = []
-    for i in range(1,gl.ChMax+1) :
-        gl.app.Out2InvVal.insert(i,tk.BooleanVar())
-        gl.app.Out2InvCheck.insert(i, ttk.Checkbutton(gl.app.SensorFrame,variable=gl.app.Out2InvVal[i-1]))
-        gl.app.Out2InvCheck[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+        col += 60
+        #出力1方向
+        gl.app.Out1InvLabel = tk.Label(gl.SensorConfWin, text="出力1\n反転", font=(deffont, fsizes))
+        gl.app.Out1InvLabel.place(x=f1fcol+col,y=f1frow-15)
+        col += 10
+        gl.app.Out1InvCheck=[]
+        gl.app.Out1InvVal = []
+        for i in range(1,gl.ChMax+1) :
+            gl.app.Out1InvVal.insert(i,tk.BooleanVar())
+            gl.app.Out1InvCheck.insert(i, ttk.Checkbutton(gl.app.SensorFrame,variable=gl.app.Out1InvVal[i-1]))
+            gl.app.Out1InvCheck[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            
+        col += 30
+        #出力2方向反転
+        gl.app.Out2InvLabel = tk.Label(gl.SensorConfWin, text="出力2\n反転", font=(deffont, fsizes))
+        gl.app.Out2InvLabel.place(x=f1fcol+col,y=f1frow-15)
+        col += 10
+        gl.app.Out2InvCheck=[]
+        gl.app.Out2InvVal = []
+        for i in range(1,gl.ChMax+1) :
+            gl.app.Out2InvVal.insert(i,tk.BooleanVar())
+            gl.app.Out2InvCheck.insert(i, ttk.Checkbutton(gl.app.SensorFrame,variable=gl.app.Out2InvVal[i-1]))
+            gl.app.Out2InvCheck[i-1].place(x=f1fcol+col,y=i*row+f1frow)
 
-    col += 30
-    #桁合わせ係数
-    gl.app.DigitsCoefLabel = tk.Label(gl.SensorConfWin, text="ﾊﾟﾗ1", font=(deffont, fsizes))
-    gl.app.DigitsCoefLabel.place(x=f1fcol+col,y=f1frow)
-    gl.app.DigitsCoefText=[]
-    for i in range(1,gl.ChMax+1) :
+        col += 30
+        #桁合わせ係数
+        gl.app.DigitsCoefLabel = tk.Label(gl.SensorConfWin, text="ﾊﾟﾗ1", font=(deffont, fsizes))
+        gl.app.DigitsCoefLabel.place(x=f1fcol+col,y=f1frow)
+        gl.app.DigitsCoefText=[]
+        for i in range(1,gl.ChMax+1) :
 
-        gl.app.DigitsCoefText.insert(i,tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes),width=8))
-        gl.app.DigitsCoefText[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.DigitsCoefText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.DigitsCoefText[i-1]:Bind.TextFloatCheck(event,arg1))
-        
-    col += 70
-    #演算係数
-    gl.app.CalcCoefLabel = tk.Label(gl.SensorConfWin, text="ﾊﾟﾗ2", font=(deffont, fsizes))
-    gl.app.CalcCoefLabel.place(x=f1fcol+col,y=f1frow)
-    gl.app.CalcCoefText=[]
-    for i in range(1,gl.ChMax+1) :
+            gl.app.DigitsCoefText.insert(i,tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes),width=8))
+            gl.app.DigitsCoefText[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.DigitsCoefText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.DigitsCoefText[i-1]:Bind.TextFloatCheck(event,arg1))
+            
+        col += 70
+        #演算係数
+        gl.app.CalcCoefLabel = tk.Label(gl.SensorConfWin, text="ﾊﾟﾗ2", font=(deffont, fsizes))
+        gl.app.CalcCoefLabel.place(x=f1fcol+col,y=f1frow)
+        gl.app.CalcCoefText=[]
+        for i in range(1,gl.ChMax+1) :
 
-        gl.app.CalcCoefText.insert(i,tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes),width=8))
-        gl.app.CalcCoefText[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.CalcCoefText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.CalcCoefText[i-1]:Bind.TextFloatCheck(event,arg1))
-        
-    col += 70
-    #比率
-    gl.app.RatioLabel = tk.Label(gl.SensorConfWin, text="ﾊﾟﾗ3", font=(deffont, fsizes))
-    gl.app.RatioLabel.place(x=f1fcol+col,y=f1frow)
-    gl.app.RatioText=[]
-    for i in range(1,gl.ChMax+1) :
+            gl.app.CalcCoefText.insert(i,tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes),width=8))
+            gl.app.CalcCoefText[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.CalcCoefText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.CalcCoefText[i-1]:Bind.TextFloatCheck(event,arg1))
+            
+        col += 70
+        #比率
+        gl.app.RatioLabel = tk.Label(gl.SensorConfWin, text="ﾊﾟﾗ3", font=(deffont, fsizes))
+        gl.app.RatioLabel.place(x=f1fcol+col,y=f1frow)
+        gl.app.RatioText=[]
+        for i in range(1,gl.ChMax+1) :
 
-        gl.app.RatioText.insert(i,tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes),width=8))
-        gl.app.RatioText[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.RatioText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.RatioText[i-1]:Bind.TextFloatCheck(event,arg1))
+            gl.app.RatioText.insert(i,tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes),width=8))
+            gl.app.RatioText[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.RatioText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.RatioText[i-1]:Bind.TextFloatCheck(event,arg1))
 
-    col += 70
-    #タイムラグ
-    gl.app.TimeLagLabel = tk.Label(gl.SensorConfWin, text="ﾊﾟﾗ4", font=(deffont, fsizes))
-    gl.app.TimeLagLabel.place(x=f1fcol+col,y=f1frow)
-    gl.app.TimeLagText=[]
-    for i in range(1,gl.ChMax+1) :
+        col += 70
+        #タイムラグ
+        gl.app.TimeLagLabel = tk.Label(gl.SensorConfWin, text="ﾊﾟﾗ4", font=(deffont, fsizes))
+        gl.app.TimeLagLabel.place(x=f1fcol+col,y=f1frow)
+        gl.app.TimeLagText=[]
+        for i in range(1,gl.ChMax+1) :
 
-        gl.app.TimeLagText.insert(i,tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes),width=8))
-        gl.app.TimeLagText[i-1].place(x=f1fcol+col,y=i*row+f1frow)
-        gl.app.TimeLagText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.TimeLagText[i-1]:Bind.TextFloatCheck(event,arg1))
-        
-    col += 70
-    #有効無効
-    gl.app.DisableLabel = tk.Label(gl.SensorConfWin, text="無効", font=(deffont, fsizes))
-    gl.app.DisableLabel.place(x=f1fcol+col,y=f1frow)
-    gl.app.DisableCheck=[]
-    gl.app.DisableVal = []
-    for i in range(1,gl.ChMax+1) :
-        gl.app.DisableVal.insert(i,tk.BooleanVar())
-        gl.app.DisableCheck.insert(i, ttk.Checkbutton(gl.app.SensorFrame,variable=gl.app.DisableVal[i-1]))
-        gl.app.DisableCheck[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.TimeLagText.insert(i,tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes),width=8))
+            gl.app.TimeLagText[i-1].place(x=f1fcol+col,y=i*row+f1frow)
+            gl.app.TimeLagText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.TimeLagText[i-1]:Bind.TextFloatCheck(event,arg1))
+            
+        col += 70
+        #有効無効
+        gl.app.DisableLabel = tk.Label(gl.SensorConfWin, text="無効", font=(deffont, fsizes))
+        gl.app.DisableLabel.place(x=f1fcol+col,y=f1frow)
+        gl.app.DisableCheck=[]
+        gl.app.DisableVal = []
+        for i in range(1,gl.ChMax+1) :
+            gl.app.DisableVal.insert(i,tk.BooleanVar())
+            gl.app.DisableCheck.insert(i, ttk.Checkbutton(gl.app.SensorFrame,variable=gl.app.DisableVal[i-1]))
+            gl.app.DisableCheck[i-1].place(x=f1fcol+col,y=i*row+f1frow)
 
-    #マウスホイール動作ｾｯﾄ
-    framechild = gl.app.SensorFrame.winfo_children()
-    for child in framechild :
-        child.bind("<MouseWheel>",lambda event,arg1=gl.app.Sensorcanvas,arg2=child: Bind.mouse_y_scroll(event,arg1,arg2))
-        child.bind("<FocusIn>",lambda event: Bind.TipDel(event))
+        #マウスホイール動作ｾｯﾄ
+        framechild = gl.app.SensorFrame.winfo_children()
+        for child in framechild :
+            child.bind("<MouseWheel>",lambda event,arg1=gl.app.Sensorcanvas,arg2=child: Bind.mouse_y_scroll(event,arg1,arg2))
+            child.bind("<FocusIn>",lambda event: Bind.TipDel(event))
 
 
-    #各ウィジェットに文字反映
-    for i in range(gl.ChMax) :
-        gl.app.SensorCombo[i].set(gl.SensorConfDic[i]['Sensor'])
-        gl.app.In1Combo[i].set(gl.SensorConfDic[i]['In1'])
-        gl.app.In2Combo[i].set(gl.SensorConfDic[i]['In2'])
-        gl.app.Out1Combo[i].set(gl.SensorConfDic[i]['Out1'])
-        gl.app.Out2Combo[i].set(gl.SensorConfDic[i]['Out2'])
-        gl.app.Out1InvVal[i].set(gl.SensorConfDic[i]['Out1Inv'])
-        gl.app.Out2InvVal[i].set(gl.SensorConfDic[i]['Out2Inv'])
-        gl.app.DigitsCoefText[i].insert(tk.END,gl.SensorConfDic[i]['DigitsCoef'])
-        gl.app.CalcCoefText[i].insert(tk.END,gl.SensorConfDic[i]['CalcCoef'])
-        gl.app.RatioText[i].insert(tk.END,gl.SensorConfDic[i]['Ratio'])
-        gl.app.TimeLagText[i].insert(tk.END,gl.SensorConfDic[i]['TimeLag'])
-        gl.app.DisableVal[i].set(gl.SensorConfDic[i]['Disable'])
-        SensorSelect('',gl.SensorList,i)
+        #各ウィジェットに文字反映
+        for i in range(gl.ChMax) :
+            gl.app.SensorCombo[i].set(gl.SensorConfDic[i]['Sensor'])
+            gl.app.In1Combo[i].set(gl.SensorConfDic[i]['In1'])
+            gl.app.In2Combo[i].set(gl.SensorConfDic[i]['In2'])
+            gl.app.Out1Combo[i].set(gl.SensorConfDic[i]['Out1'])
+            gl.app.Out2Combo[i].set(gl.SensorConfDic[i]['Out2'])
+            gl.app.Out1InvVal[i].set(gl.SensorConfDic[i]['Out1Inv'])
+            gl.app.Out2InvVal[i].set(gl.SensorConfDic[i]['Out2Inv'])
+            gl.app.DigitsCoefText[i].insert(tk.END,gl.SensorConfDic[i]['DigitsCoef'])
+            gl.app.CalcCoefText[i].insert(tk.END,gl.SensorConfDic[i]['CalcCoef'])
+            gl.app.RatioText[i].insert(tk.END,gl.SensorConfDic[i]['Ratio'])
+            gl.app.TimeLagText[i].insert(tk.END,gl.SensorConfDic[i]['TimeLag'])
+            gl.app.DisableVal[i].set(gl.SensorConfDic[i]['Disable'])
+            SensorSelect('',gl.SensorList,i)
 
-    #ウインドウ閉じをキャッチ
-    gl.SensorConfWin.protocol('WM_DELETE_WINDOW',SensorConfWincallback)
+        #ウインドウ閉じをキャッチ
+        gl.SensorConfWin.protocol('WM_DELETE_WINDOW',SensorConfWincallback)
+    else:
+        gl.SensorConfWin.lift()
+        gl.SensorConfWin.focus_set()
 
 
 #-----------------------------------------
