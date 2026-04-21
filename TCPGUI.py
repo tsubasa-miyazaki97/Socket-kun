@@ -32,10 +32,10 @@ class App(tk.Tk):
         self.grid_columnconfigure(0, weight=1)
 #-----------------------------------main_frame-----------------------------
 
-        frow = 30
+        frow = 40
         fcol = 20
         row = 30
-        col = 70
+        col = 90
         
         # メインページフレーム作成
         self.mainm_frame = tk.Frame()#切替用ﾌﾚｰﾑ
