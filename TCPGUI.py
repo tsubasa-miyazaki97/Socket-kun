@@ -65,21 +65,13 @@ class App(tk.Tk):
         self.ScanTimems = tk.Label(toolbar_frame, text='ms', font=(gl.deffont, gl.fsizes))
         self.ScanTimems.grid(row=0, column=tc, padx=2)
         tc += 1
-        # 通信設定ボタン
-        self.changePageButton = tk.Button(toolbar_frame, text="通信設定", command=lambda: ConectConfdef())
-        self.changePageButton.grid(row=0, column=tc, padx=2)
-        tc += 1
-        # センサー設定ボタン
-        self.SensorConfButton = tk.Button(toolbar_frame, text="ｾﾝｻｰ設定", command=lambda: SensorConfdef())
-        self.SensorConfButton.grid(row=0, column=tc, padx=2)
-        tc += 1
-        # IO設定クリアボタン
-        self.IOClearConfButton = tk.Button(toolbar_frame, text="IO設定ｸﾘｱ", command=lambda: Bind.IOConfClear())
-        self.IOClearConfButton.grid(row=0, column=tc, padx=2)
-        tc += 1
         # トレースボタン
         self.TraceButton = tk.Button(toolbar_frame, text="ﾄﾚｰｽ開始", command=lambda: Trace.TracePush())
         self.TraceButton.grid(row=0, column=tc, padx=2)
+        tc += 1
+        ### トレースｽｷｬﾝﾀｲﾑラベル作成
+        TraceScanTimelabel = tk.Label(toolbar_frame, text='トレースｽｷｬﾝﾀｲﾑ', font=(gl.deffont, gl.fsizes))
+        TraceScanTimelabel.grid(row=0, column=tc, padx=2)
         tc += 1
         ###ﾄﾚｰｽｽｷｬﾝﾀｲﾑコンボボックス
         self.Tracecombo = ttk.Combobox(toolbar_frame, values=gl.TraceTime, font=(gl.deffont, gl.fsizes), width=7)
@@ -95,6 +87,18 @@ class App(tk.Tk):
         self.WinWidthButton = tk.Button(toolbar_frame, text="◀", command=lambda: Bind.WinWidthSwitch())
         self.WinWidthButton.grid(row=0, column=tc, padx=2)
         tc += 1
+        # 通信設定ボタン
+        self.changePageButton = tk.Button(toolbar_frame, text="通信設定", command=lambda: ConectConfdef())
+        self.changePageButton.grid(row=0, column=tc, padx=2)
+        tc += 1
+        # センサー設定ボタン
+        self.SensorConfButton = tk.Button(toolbar_frame, text="ｾﾝｻｰ設定", command=lambda: SensorConfdef())
+        self.SensorConfButton.grid(row=0, column=tc, padx=2)
+        tc += 1
+        # IO設定クリアボタン
+        self.IOClearConfButton = tk.Button(toolbar_frame, text="IO設定ｸﾘｱ", command=lambda: Bind.IOConfClear())
+        self.IOClearConfButton.grid(row=0, column=tc, padx=2)
+        tc += 1
         # ｴｸｽﾎﾟｰﾄボタン
         self.ExportButton = tk.Button(toolbar_frame, text="ｴｸｽﾎﾟｰﾄ", command=lambda: InExeport.Export())
         self.ExportButton.grid(row=0, column=tc, padx=2)
@@ -106,7 +110,7 @@ class App(tk.Tk):
 #-----------------------------------canvas / main_frame--------------------
 
         # スクロールバー設置
-        self.canvas = tk.Canvas(self, width=gl.winmaxwidth, height=gl.winheight)
+        self.canvas = tk.Canvas(self, width=gl.winmaxwidth, height=gl.winheight, highlightthickness=0)
         self.canvas.grid(row=1, column=0, sticky="nsew")
 
         self.ybar = tk.Scrollbar(self, orient=tk.VERTICAL)  # 縦スクロールバー配置
@@ -116,7 +120,7 @@ class App(tk.Tk):
         self.canvas.yview_moveto(0)  # キャンバスのスクロールを初期化
 
         # キャンバス上にフレーム設置（ヘッダー行 + データ行をまとめて grid 管理）
-        self.main_frame = tk.Frame(self.canvas, width=gl.winmaxwidth*10)
+        self.main_frame = tk.Frame(self.canvas, width=gl.winmaxwidth*10, highlightthickness=0)
         self.canvas.create_window(0, 0, window=self.main_frame, anchor="nw")
         self.canvas.config(scrollregion=self.canvas.bbox('all'))  # フレームにフィットするようにキャンバスのスクロール可能範囲を変更
         self.main_frame.bind("<Configure>", lambda e: self.canvas.config(scrollregion=self.canvas.bbox('all')))
@@ -301,6 +305,9 @@ class App(tk.Tk):
             self.AI100ValueText[i].insert(0, str(gl.IOConfDic[i]['AI100']))
             self.User0ValueText[i].insert(0, str(gl.IOConfDic[i]['User0']))
             self.User100ValueText[i].insert(0, str(gl.IOConfDic[i]['User100']))
+            cv = gl.IOConfDic[i].get('CurrentVal', '') if isinstance(gl.IOConfDic[i], dict) else ''
+            if cv:
+                gl.ValueText[i].set(cv)
 
 #--------------------------------------------------------------------------
 
