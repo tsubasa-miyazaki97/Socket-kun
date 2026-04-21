@@ -91,29 +91,29 @@ class App(tk.Tk):
         self.changePageButton = tk.Button(self.canvas, text="通信設定", command=lambda : ConectConfdef())
         self.changePageButton.place(x=col,y=0)
         # センサー設定ボタン
-        col += 65
+        col += 70
         self.SensorConfButton = tk.Button(self.canvas, text="ｾﾝｻｰ設定", command=lambda : SensorConfdef())
         self.SensorConfButton.place(x=col,y=0)
         # IO設定クリアボタン
-        col += 59
+        col += 67
         self.IOClearConfButton = tk.Button(self.canvas, text="IO設定ｸﾘｱ", command=lambda : Bind.IOConfClear())
         self.IOClearConfButton.place(x=col,y=0)
         # トレースボタン
-        col += 70
+        col += 80
         self.TraceButton = tk.Button(self.canvas, text="ﾄﾚｰｽ開始", command=lambda : Trace.TracePush())
         self.TraceButton.place(x=col,y=0)
         ###ﾄﾚｰｽｽｷｬﾝﾀｲﾑコンボボックス
-        col += 60
+        col += 70
         self.Tracecombo=ttk.Combobox(self.canvas,values=gl.TraceTime, font=(gl.deffont, gl.fsizes),width=7)
         self.Tracecombo.place(x=col,y=0)
         self.Tracecombo.bind('<FocusOut>',lambda event,arg1=self.Tracecombo,arg2=gl.TraceTime:Bind.ComboChange(event,arg1,arg2))
         self.Tracecombo.set(gl.TraceTime[0])
         ### ﾄﾚｰｽｽｷｬﾝﾀｲﾑ単位作成
-        col += 75
+        col += 90
         self.TraceScanTimems = tk.Label(self.canvas,text='ms',font=(gl.deffont, gl.fsizes))
         self.TraceScanTimems.place(x=col,y=0)
         ###表示範囲切替ボタン
-        col += 25
+        col += 30
         self.WinWidthButton = tk.Button(self.canvas, text="◀", command=lambda : Bind.WinWidthSwitch())
         self.WinWidthButton.place(x=col,y=0)
         # ｴｸｽﾎﾟｰﾄボタン
