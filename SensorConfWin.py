@@ -84,6 +84,12 @@ def SensorConf() :
         tk.Label(gl.app.SensorFrame, text="ﾊﾟﾗ4",   font=(deffont, fsizes)).grid(row=0, column=C_PARA4,   padx=2, pady=2)
         tk.Label(gl.app.SensorFrame, text="無効",    font=(deffont, fsizes)).grid(row=0, column=C_DISABLE, padx=2, pady=2)
 
+        # ヘッダー構築完了後に早期表示・グラブ（行生成前に画面を出す）
+        gl.SensorConfWin.deiconify()
+        gl.SensorConfWin.grab_set()
+        gl.SensorConfWin.focus_set()
+        gl.SensorConfWin.update()
+
         # データ行
         gl.app.SensorNolabel=[]
         gl.app.SensorCombo=[]
@@ -173,6 +179,9 @@ def SensorConf() :
             gl.app.DisableVal.insert(i, disable_val)
             gl.app.DisableCheck.insert(i, disable_check)
 
+            if i % 50 == 0:
+                gl.SensorConfWin.update_idletasks()
+
         #マウスホイール動作ｾｯﾄ
         framechild = gl.app.SensorFrame.winfo_children()
         for child in framechild :
@@ -202,10 +211,6 @@ def SensorConf() :
         # スクロール範囲を確定し、以降の変更に追従するよう<Configure>をバインド
         gl.app.SensorFrame.bind("<Configure>",lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
 
-        # 全ウィジェット構築完了後に表示・グラブ
-        gl.SensorConfWin.deiconify()
-        gl.SensorConfWin.grab_set()
-        gl.SensorConfWin.focus_set()
     else:
         gl.SensorConfWin.lift()
         gl.SensorConfWin.focus_set()
