@@ -35,12 +35,14 @@ def SensorConf() :
 #-----------------------------------------
 
         gl.app.Sensormainm_frame = tk.Frame(gl.SensorConfWin)#切替用ﾌﾚｰﾑ
-        gl.app.Sensormainm_frame.grid(row=1, column=0)
+        gl.app.Sensormainm_frame.grid(row=1, column=0, sticky="nsew")
+        gl.app.Sensormainm_frame.grid_rowconfigure(0, weight=1)
+        gl.app.Sensormainm_frame.grid_columnconfigure(0, weight=1)
         #スクロールバー設置
-        gl.app.Sensorcanvas = tk.Canvas(gl.app.Sensormainm_frame,width=winwidth,height=winheight-30)#スクロールバー置けるウィジェット(キャンバス)配置
+        gl.app.Sensorcanvas = tk.Canvas(gl.app.Sensormainm_frame, highlightthickness=0)#スクロールバー置けるウィジェット(キャンバス)配置
 
-        gl.app.SensorFrame = tk.Frame(gl.app.Sensorcanvas,width=winwidth,height=30.6*gl.ChMax)#キャンバス上にﾌﾚｰﾑ設置
-        gl.app.Sensorcanvas.grid(row=0,column=0)
+        gl.app.SensorFrame = tk.Frame(gl.app.Sensorcanvas, highlightthickness=0)#キャンバス上にﾌﾚｰﾑ設置
+        gl.app.Sensorcanvas.grid(row=0, column=0, sticky="nsew")
         gl.app.Sensorcanvas.create_window(0,0,window=gl.app.SensorFrame,anchor="nw")#キャンバスにフレーム設置
         gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all'))#フレームにフィットするようにキャンバスのスクロール可能範囲を変更
         gl.app.SensorFrame.bind("<Configure>",lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
@@ -51,6 +53,7 @@ def SensorConf() :
         gl.app.Sensorcanvas.config(yscrollcommand=gl.app.Sensorybar.set)#キャンバスにスクロールバーの動きを反映
         gl.app.Sensorcanvas.yview_moveto(0)#キャンバスのスクロールを初期化
         gl.app.SensorFrame.bind("<MouseWheel>",lambda event,arg1=gl.app.Sensorcanvas,arg2=gl.app.SensorFrame: Bind.mouse_y_scroll(event,arg1,arg2))#マウスホイール関数をﾌﾚｰﾑにｾｯﾄ
+        gl.app.Sensorcanvas.bind("<MouseWheel>",lambda event: Bind.mouse_y_scroll(event,gl.app.Sensorcanvas,None))#キャンバス空白部分のマウスホイール対応
 
         # 列定数
         C_NO      = 0
