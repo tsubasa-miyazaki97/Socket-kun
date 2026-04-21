@@ -51,11 +51,11 @@ def Export():
     if CSVPath == '':
         return
     try:
-        CSVFile = open(CSVPath,'w',newline="")
-        CSVwriter = csv.DictWriter(CSVFile,gl.Key)
-        CSVwriter.writeheader()
-        CSVwriter.writerows(ExportDic)
-    except:
+        with open(CSVPath,'w',newline="") as CSVFile:
+            CSVwriter = csv.DictWriter(CSVFile,gl.Key)
+            CSVwriter.writeheader()
+            CSVwriter.writerows(ExportDic)
+    except Exception:
         messagebox.showinfo('エラー','保存できませんでした。')
 
 
@@ -66,10 +66,10 @@ def Inport():
     if CSVPath == '':
         return
     try:
-        CSVFile = open(CSVPath,'r',newline="")
-        CSVreader = csv.DictReader(CSVFile)
-        data = [row for row in CSVreader]
-    except:
+        with open(CSVPath,'r',newline="") as CSVFile:
+            CSVreader = csv.DictReader(CSVFile)
+            data = [row for row in CSVreader]
+    except Exception:
         messagebox.showinfo('エラー','保存できませんでした。')
         return
     

@@ -134,7 +134,7 @@ def IOConfWinChange():
         gl.app.DeviceNoCombo[i]['values']=gl.EnableDevice
         gl.app.DeviceNoCombo[i].bind('<FocusOut>',lambda event,arg1=gl.app.DeviceNoCombo[i-1],arg2=gl.EnableDevice:Bind.ComboChange(event,arg1,arg2))
     gl.app.Periodcombo['values']=gl.EnableDevice
-    gl.app.Periodcombo.bind('<FocusOut>',lambda event,arg1=gl.app.DeviceNoCombo[i-1],arg2=gl.EnableDevice:Bind.ComboChange(event,arg1,arg2))
+    gl.app.Periodcombo.bind('<FocusOut>',lambda event,arg1=gl.app.Periodcombo,arg2=gl.EnableDevice:Bind.ComboChange(event,arg1,arg2))
 
 def EnableCheck():
     
