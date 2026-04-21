@@ -86,6 +86,11 @@ class App(tk.Tk):
         self.TraceScanTimems = tk.Label(toolbar_frame, text='ms', font=(gl.deffont, gl.fsizes))
         self.TraceScanTimems.grid(row=0, column=tc, padx=2)
         tc += 1
+        # 右寄せ用スペーサー
+        spacer = tk.Label(toolbar_frame, text="")
+        spacer.grid(row=0, column=tc, sticky="ew")
+        toolbar_frame.grid_columnconfigure(tc, weight=1)
+        tc += 1
         ###表示範囲切替ボタン
         self.WinWidthButton = tk.Button(toolbar_frame, text="◀", command=lambda: Bind.WinWidthSwitch())
         self.WinWidthButton.grid(row=0, column=tc, padx=2)

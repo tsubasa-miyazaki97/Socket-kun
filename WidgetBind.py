@@ -177,11 +177,19 @@ def WinWidthSwitch() :
         # ウィンドウサイズを縮小してコメント列以降を非表示
         gl.app.WinWidthButton['text'] = "▶"
         gl.app.changePageButton.grid_remove()
+        gl.app.SensorConfButton.grid_remove()
+        gl.app.IOClearConfButton.grid_remove()
+        gl.app.ExportButton.grid_remove()
+        gl.app.InportButton.grid_remove()
         gl.app.geometry(str(gl.winwidth) + "x" + str(gl.winheight))
     else:
         # ウィンドウサイズを元に戻して全列を表示
         gl.app.WinWidthButton['text'] = "◀"
         gl.app.changePageButton.grid()
+        gl.app.SensorConfButton.grid()
+        gl.app.IOClearConfButton.grid()
+        gl.app.ExportButton.grid()
+        gl.app.InportButton.grid()
         gl.app.geometry(str(gl.winmaxwidth) + "x" + str(gl.winheight))
 
 
