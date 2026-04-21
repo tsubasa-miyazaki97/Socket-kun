@@ -102,6 +102,7 @@ def Test():
                     url = f"opc.tcp://{host}:{port}/"
                     client = Client(url=url)
                     loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
                     try:
                         loop.run_until_complete(client.connect())
                         Result = Result + 'デバイスNo'+ str(i) + ' : 接続OK\n'
@@ -109,6 +110,8 @@ def Test():
                         loop.run_until_complete(client.disconnect())
                     except :
                         Result = Result + 'デバイスNo'+ str(i) + ' : 接続NG\nIP,PORT,パソコンの設定,LANの確認をしてください。\n'
+                    finally:
+                        loop.close()
 
 
                     #client.close

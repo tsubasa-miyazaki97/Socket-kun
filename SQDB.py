@@ -5,7 +5,7 @@ import ConectConfWin as ConectConf
 import SensorConfWin as SensorConf
 import IORW
 sqlite3.register_adapter(bool, lambda b: str(b))
-sqlite3.register_converter('BOOL', lambda l: l.decode().strip().capitalize() == 'True')
+sqlite3.register_converter('BOOL', lambda l: l.decode().strip().capitalize() == 'True' if l is not None else False)
 
 def DBConnect():
     
