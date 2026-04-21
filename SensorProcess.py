@@ -1,5 +1,4 @@
 import math
-from telnetlib import theNULL
 import TCPGlobalVar as gl
 import PIDControl as PID
 iscloseNo = 0.00000001#センサーの読込値と書込み値の近似値判定範囲 大きい方が緩い

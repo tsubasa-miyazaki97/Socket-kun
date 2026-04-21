@@ -71,6 +71,7 @@ def Inport():
         data = [row for row in CSVreader]
     except:
         messagebox.showinfo('エラー','保存できませんでした。')
+        return
     
     for key in data[0]:
         if key not in gl.Key:
