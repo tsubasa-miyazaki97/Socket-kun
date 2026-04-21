@@ -18,63 +18,60 @@ def ConectConf() :
         gl.ConectConfWin.title("通信設定")
         gl.ConectConfWin.grab_set()
         gl.ConectConfWin.focus_set()
+        gl.ConectConfWin.grid_rowconfigure(1, weight=1)
+        gl.ConectConfWin.grid_columnconfigure(0, weight=1)
 #-----------------------------------------
-        #DeviceList=["PC10G","MP"]
 
-        f1frow = 80
-        f1fcol = 50
-        f1row = 40
-        f1col = 100
+        # ツールバーフレーム
+        toolbar_frame = tk.Frame(gl.ConectConfWin)
+        toolbar_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
 
         # 接続テストボタン
-        gl.app.Testbutton = tk.Button(gl.ConectConfWin, text="接続テスト", command=lambda : ConectTestdef())
-        gl.app.Testbutton.place(x=260,y=0)
-        # ﾃﾞﾌｫﾙﾄ設定ボタン   
-        gl.app.Defbutton = tk.Button(gl.ConectConfWin, text="デフォルト設定", command=lambda : DefConf())
-        gl.app.Defbutton.place(x=460,y=0)
+        gl.app.Testbutton = tk.Button(toolbar_frame, text="接続テスト", command=lambda : ConectTestdef())
+        gl.app.Testbutton.grid(row=0, column=0, padx=2, pady=2)
+        # ﾃﾞﾌｫﾙﾄ設定ボタン
+        gl.app.Defbutton = tk.Button(toolbar_frame, text="デフォルト設定", command=lambda : DefConf())
+        gl.app.Defbutton.grid(row=0, column=1, padx=2, pady=2)
         # 設定クリアボタン
-        gl.app.ConfClearbutton = tk.Button(gl.ConectConfWin, text="設定クリア", command=lambda : ConfClear())
-        gl.app.ConfClearbutton.place(x=660,y=0)
+        gl.app.ConfClearbutton = tk.Button(toolbar_frame, text="設定クリア", command=lambda : ConfClear())
+        gl.app.ConfClearbutton.grid(row=0, column=2, padx=2, pady=2)
 
-        #ﾃﾞﾊﾞｲｽNo
-        gl.app.DeviceNoLabel = tk.Label(gl.ConectConfWin, text="デバイスNo", font=(deffont, fsizes))
-        gl.app.DeviceNoLabel.place(x=f1fcol-f1fcol/2,y=f1frow)
+        # コンテンツフレーム
+        content_frame = tk.Frame(gl.ConectConfWin)
+        content_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=5)
 
+        # ヘッダー行 (row=0)
+        tk.Label(content_frame, text="デバイスNo", font=(deffont, fsizes)).grid(row=0, column=0, padx=5, pady=4)
+        tk.Label(content_frame, text="接続機器", font=(deffont, fsizes)).grid(row=0, column=1, padx=5, pady=4)
+        tk.Label(content_frame, text="IPアドレス", font=(deffont, fsizes)).grid(row=0, column=2, padx=5, pady=4)
+        tk.Label(content_frame, text="PORT", font=(deffont, fsizes)).grid(row=0, column=3, padx=5, pady=4)
+
+        # データ行
         gl.app.Nolabel=[]
-        for i in range(1,gl.DeviceMax+1) :
-            gl.app.Nolabel.insert(i,tk.Label(gl.ConectConfWin, text=i , font=(deffont,fsizes)))
-            gl.app.Nolabel[i-1].place(x=f1fcol,y=i*f1row+f1frow)
-
-        #接続機器
-        gl.app.DeviceLabel = tk.Label(gl.ConectConfWin, text="接続機器", font=(deffont, fsizes))
-        gl.app.DeviceLabel.place(x=f1fcol+f1col,y=f1frow)
-
         gl.app.DeviceCombo=[]
-        for i in range(1,gl.DeviceMax+1) :
-            gl.app.DeviceCombo.insert(i, ttk.Combobox(gl.ConectConfWin,values=gl.DeviceList, font=(deffont, fsizes)))
-            gl.app.DeviceCombo[i-1].place(x=f1fcol+f1col,y=i*f1row+f1frow)
-            gl.app.DeviceCombo[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.DeviceCombo[i-1],arg2=gl.DeviceList:Bind.ComboChange(event,arg1,arg2))
-
-        #IPｱﾄﾞﾚｽ
-        gl.app.IPLabel = tk.Label(gl.ConectConfWin, text="IPアドレス", font=(deffont, fsizes))
-        gl.app.IPLabel.place(x=f1fcol+f1col*3,y=f1frow)
-
         gl.app.IPText=[]
-        for i in range(1,gl.DeviceMax+1) :
-
-            gl.app.IPText.insert(i,tk.Entry(gl.ConectConfWin, font=(deffont, fsizes)))
-            gl.app.IPText[i-1].place(x=f1fcol+f1col*3,y=i*f1row+f1frow)
-
-        #PORT
-        gl.app.PortLabel = tk.Label(gl.ConectConfWin, text="PORT", font=(deffont, fsizes))
-        gl.app.PortLabel.place(x=f1fcol+f1col*5,y=f1frow)
-
         gl.app.PortText=[]
         for i in range(1,gl.DeviceMax+1) :
-            gl.app.PortText.insert(i,tk.Entry(gl.ConectConfWin,text = '',font=(deffont, fsizes)))
-            gl.app.PortText[i-1].place(x=f1fcol+f1col*5,y=i*f1row+f1frow)
-            gl.app.PortText[i-1].bind('<FocusOut>',lambda event,arg1=gl.app.PortText[i-1]:Bind.TextUIntCheck(event,arg1))
-        
+            r = i  # row (0=ヘッダー, 1..DeviceMax=データ)
+
+            lbl = tk.Label(content_frame, text=i, font=(deffont, fsizes))
+            lbl.grid(row=r, column=0, padx=5, pady=2)
+            gl.app.Nolabel.insert(i, lbl)
+
+            combo = ttk.Combobox(content_frame, values=gl.DeviceList, font=(deffont, fsizes))
+            combo.grid(row=r, column=1, padx=5, pady=2)
+            combo.bind('<FocusOut>', lambda event, arg1=combo, arg2=gl.DeviceList: Bind.ComboChange(event, arg1, arg2))
+            gl.app.DeviceCombo.insert(i, combo)
+
+            ip = tk.Entry(content_frame, font=(deffont, fsizes))
+            ip.grid(row=r, column=2, padx=5, pady=2)
+            gl.app.IPText.insert(i, ip)
+
+            port = tk.Entry(content_frame, font=(deffont, fsizes))
+            port.grid(row=r, column=3, padx=5, pady=2)
+            port.bind('<FocusOut>', lambda event, arg1=port: Bind.TextUIntCheck(event, arg1))
+            gl.app.PortText.insert(i, port)
+
         #各ウィジェットに文字反映
         for i in range(gl.DeviceMax) :
             gl.app.DeviceCombo[i].set(gl.DeviceConfDic[i]['Device'])
