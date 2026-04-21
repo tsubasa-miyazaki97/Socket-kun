@@ -41,7 +41,7 @@ def SensorConf() :
 
         gl.app.SensorFrame = tk.Frame(gl.app.Sensorcanvas,width=winwidth,height=30.6*gl.ChMax)#キャンバス上にﾌﾚｰﾑ設置
         gl.app.Sensorcanvas.grid(row=0,column=0)
-        gl.app.Sensorcanvas.create_window(0,0,window=gl.app.SensorFrame)#キャンバスにフレーム設置
+        gl.app.Sensorcanvas.create_window(0,0,window=gl.app.SensorFrame,anchor="nw")#キャンバスにフレーム設置
         gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all'))#フレームにフィットするようにキャンバスのスクロール可能範囲を変更
         gl.app.SensorFrame.bind("<Configure>",lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
 

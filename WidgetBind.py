@@ -174,33 +174,13 @@ def IOConfClear():
 
 def WinWidthSwitch() :
     if gl.app.WinWidthButton['text'] == "◀" :
-        # コメント列以降（型・AI値・ユーザ値列）を非表示にして最小表示に切替
+        # ウィンドウサイズを縮小してコメント列以降を非表示
         gl.app.WinWidthButton['text'] = "▶"
-        gl.app.VarTypeLabel.grid_remove()
-        gl.app.AI0Label.grid_remove()
-        gl.app.AI100Label.grid_remove()
-        gl.app.User0Label.grid_remove()
-        gl.app.User100Label.grid_remove()
-        for i in range(gl.ChMax):
-            gl.app.VarTypecombo[i].grid_remove()
-            gl.app.AI0ValueText[i].grid_remove()
-            gl.app.AI100ValueText[i].grid_remove()
-            gl.app.User0ValueText[i].grid_remove()
-            gl.app.User100ValueText[i].grid_remove()
+        gl.app.geometry(str(gl.winwidth) + "x" + str(gl.winheight))
     else:
-        # 全列を表示に戻す
+        # ウィンドウサイズを元に戻して全列を表示
         gl.app.WinWidthButton['text'] = "◀"
-        gl.app.VarTypeLabel.grid()
-        gl.app.AI0Label.grid()
-        gl.app.AI100Label.grid()
-        gl.app.User0Label.grid()
-        gl.app.User100Label.grid()
-        for i in range(gl.ChMax):
-            gl.app.VarTypecombo[i].grid()
-            gl.app.AI0ValueText[i].grid()
-            gl.app.AI100ValueText[i].grid()
-            gl.app.User0ValueText[i].grid()
-            gl.app.User100ValueText[i].grid()
+        gl.app.geometry(str(gl.winmaxwidth) + "x" + str(gl.winheight))
 
 
 

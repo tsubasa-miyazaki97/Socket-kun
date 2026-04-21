@@ -14,7 +14,6 @@ def ConectConf() :
 
     if gl.ConectConfWin ==  None or not gl.ConectConfWin.winfo_exists()  :
         gl.ConectConfWin = tk.Toplevel()
-        gl.ConectConfWin.geometry("800x400")
         gl.ConectConfWin.title("通信設定")
         gl.ConectConfWin.grab_set()
         gl.ConectConfWin.focus_set()
@@ -58,16 +57,16 @@ def ConectConf() :
             lbl.grid(row=r, column=0, padx=5, pady=2)
             gl.app.Nolabel.insert(i, lbl)
 
-            combo = ttk.Combobox(content_frame, values=gl.DeviceList, font=(deffont, fsizes))
+            combo = ttk.Combobox(content_frame, values=gl.DeviceList, font=(deffont, fsizes), width=16)
             combo.grid(row=r, column=1, padx=5, pady=2)
             combo.bind('<FocusOut>', lambda event, arg1=combo, arg2=gl.DeviceList: Bind.ComboChange(event, arg1, arg2))
             gl.app.DeviceCombo.insert(i, combo)
 
-            ip = tk.Entry(content_frame, font=(deffont, fsizes))
+            ip = tk.Entry(content_frame, font=(deffont, fsizes), width=16)
             ip.grid(row=r, column=2, padx=5, pady=2)
             gl.app.IPText.insert(i, ip)
 
-            port = tk.Entry(content_frame, font=(deffont, fsizes))
+            port = tk.Entry(content_frame, font=(deffont, fsizes), width=16)
             port.grid(row=r, column=3, padx=5, pady=2)
             port.bind('<FocusOut>', lambda event, arg1=port: Bind.TextUIntCheck(event, arg1))
             gl.app.PortText.insert(i, port)
@@ -78,6 +77,11 @@ def ConectConf() :
             gl.app.IPText[i].insert(tk.END,gl.DeviceConfDic[i]['IPAddress'])
             gl.app.PortText[i].insert(tk.END,gl.DeviceConfDic[i]['Port'])
         
+        #ウィンドウサイズを内容に合わせて自動調整
+        gl.ConectConfWin.update_idletasks()
+        gl.ConectConfWin.geometry(
+            f"{gl.ConectConfWin.winfo_reqwidth()}x{gl.ConectConfWin.winfo_reqheight()}"
+        )
         #ウインドウ閉じをキャッチ
         gl.ConectConfWin.protocol('WM_DELETE_WINDOW',ConectConfWincallback)
     else:

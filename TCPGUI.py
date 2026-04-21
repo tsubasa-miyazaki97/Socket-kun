@@ -69,8 +69,8 @@ class App(tk.Tk):
         self.TraceButton = tk.Button(toolbar_frame, text="ﾄﾚｰｽ開始", command=lambda: Trace.TracePush())
         self.TraceButton.grid(row=0, column=tc, padx=2)
         tc += 1
-        ### トレースｽｷｬﾝﾀｲﾑラベル作成
-        TraceScanTimelabel = tk.Label(toolbar_frame, text='トレースｽｷｬﾝﾀｲﾑ', font=(gl.deffont, gl.fsizes))
+        ### ﾄﾚｰｽｽｷｬﾝﾀｲﾑラベル作成
+        TraceScanTimelabel = tk.Label(toolbar_frame, text='ﾄﾚｰｽｽｷｬﾝﾀｲﾑ', font=(gl.deffont, gl.fsizes))
         TraceScanTimelabel.grid(row=0, column=tc, padx=2)
         tc += 1
         ###ﾄﾚｰｽｽｷｬﾝﾀｲﾑコンボボックス
