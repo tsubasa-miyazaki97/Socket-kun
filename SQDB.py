@@ -42,8 +42,9 @@ def TableCreate():
         #既存テーブルへのCurrentVal列追加(マイグレーション)
         try:
             gl.Cur.execute('ALTER TABLE IOConf ADD COLUMN CurrentVal varchar(1024) DEFAULT ""')
-        except sqlite3.OperationalError:
-            pass  #列が既に存在する場合は無視
+        except sqlite3.OperationalError as e:
+            if 'duplicate column name' not in str(e):
+                raise  #列重複以外のエラーは再送出
 
     #センサー設定テーブル有無確認して作成
     gl.Cur.execute("SELECT * FROM sqlite_master WHERE type='table' and name='SensorConf'")

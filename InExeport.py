@@ -31,6 +31,7 @@ def Export():
         ExportDic[i]['AI100']=gl.app.AI100ValueText[i].get()
         ExportDic[i]['User0']=gl.app.User0ValueText[i].get()
         ExportDic[i]['User100']=gl.app.User100ValueText[i].get()
+        ExportDic[i]['CurrentVal']=str(gl.IOConfDic[i].get('CurrentVal', '') if isinstance(gl.IOConfDic[i], dict) else '')
     for i in range(gl.ChMax):
         ExportDic[i]['Sensor']=gl.SensorConfDic[i]['Sensor']
         ExportDic[i]['In1']=gl.SensorConfDic[i]['In1']
@@ -123,6 +124,7 @@ def Inport():
         gl.app.AI100ValueText[i].insert(0,data[i]['AI100'])
         gl.app.User0ValueText[i].insert(0,data[i]['User0'])
         gl.app.User100ValueText[i].insert(0,data[i]['User100'])
+        gl.IOConfDic[i]['CurrentVal'] = data[i].get('CurrentVal', '')
 
     for i in range(ChMax):
         gl.SensorConfDic[i]['Sensor']=data[i]['Sensor']
