@@ -30,7 +30,7 @@ MyPath = os.path.dirname(os.path.abspath(__file__))
 TraceTime = ['ｽｷｬﾝﾀｲﾑ','20','50','100']
 
 Key = ['Device','IPAddress','Port','DeviceNo','Address','Init','UpDown','Comment','VarType','AI0','AI100','User0','User100',\
-    'Sensor','In1','In2','Out1','Out2','Out1Inv','Out2Inv','DigitsCoef','CalcCoef','Ratio','TimeLag','Disable']
+    'Sensor','In1','In2','Out1','Out2','Out1Inv','Out2Inv','DigitsCoef','CalcCoef','Ratio','TimeLag','Disable','CurrentVal']
 
 CJInitHeader = '46494E530000000C000000000000000000000000'
 

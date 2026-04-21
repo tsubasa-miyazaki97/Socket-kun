@@ -33,11 +33,18 @@ def TableCreate():
     if not gl.Cur.fetchone():
         gl.Cur.execute('CREATE TABLE IOConf (id int primary key, DeviceNo varchar(1024), Address varchar(1024),\
                 Init varchar(1024), UpDown varchar(1024), Comment varchar(1024), VarType varchar(1024), AI0 varchar(1024),\
-                    AI100 varchar(1024), User0 varchar(1024), User100 varchar(1024))')
+                    AI100 varchar(1024), User0 varchar(1024), User100 varchar(1024), CurrentVal varchar(1024))')
 
         for i in range(gl.ChMax):
-            gl.Cur.execute("REPLACE INTO IOConf VALUES (?,?,?,?,?,?,?,?,?,?,?)",\
-                            (i,'','','','','','','','','',''))
+            gl.Cur.execute("REPLACE INTO IOConf VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",\
+                            (i,'','','','','','','','','','',''))
+    else:
+        #既存テーブルへのCurrentVal列追加(マイグレーション)
+        try:
+            gl.Cur.execute('ALTER TABLE IOConf ADD COLUMN CurrentVal varchar(1024) DEFAULT ""')
+        except sqlite3.OperationalError as e:
+            if 'duplicate column name' not in str(e):
+                raise  #列重複以外のエラーは再送出
 
     #センサー設定テーブル有無確認して作成
     gl.Cur.execute("SELECT * FROM sqlite_master WHERE type='table' and name='SensorConf'")
@@ -85,10 +92,11 @@ def BackUp():
                         (i,gl.DeviceConfDic[i]['Device'],gl.DeviceConfDic[i]['IPAddress'],str(gl.DeviceConfDic[i]['Port'])))
 
     for i in range(gl.ChMax):
-        gl.Cur.execute("REPLACE INTO IOConf VALUES (?,?,?,?,?,?,?,?,?,?,?)",\
+        gl.Cur.execute("REPLACE INTO IOConf VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",\
                         (i,gl.app.DeviceNoCombo[i].get(),gl.app.AddressText[i].get(),gl.app.InitValueText[i].get(),\
                         gl.app.UDValueText[i].get(),gl.app.CommentText[i].get(),gl.app.VarTypecombo[i].get(),gl.app.AI0ValueText[i].get(),\
-                        gl.app.AI100ValueText[i].get(),gl.app.User0ValueText[i].get(),gl.app.User100ValueText[i].get()))
+                        gl.app.AI100ValueText[i].get(),gl.app.User0ValueText[i].get(),gl.app.User100ValueText[i].get(),\
+                        str(gl.IOConfDic[i].get('CurrentVal', '') if isinstance(gl.IOConfDic[i], dict) else '')))
 
     for i in range(gl.ChMax):
         gl.Cur.execute("REPLACE INTO SensorConf VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",\
