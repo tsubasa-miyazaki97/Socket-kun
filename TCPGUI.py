@@ -39,6 +39,7 @@ class App(tk.Tk):
         # ツールバーフレーム（row=0 / スクロールしない）
         toolbar_frame = tk.Frame(self)
         toolbar_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
+        self.toolbar_frame_ref = toolbar_frame
 
         tc = 0  # ツールバー列カウンタ
 
@@ -86,34 +87,26 @@ class App(tk.Tk):
         self.TraceScanTimems = tk.Label(toolbar_frame, text='ms', font=(gl.deffont, gl.fsizes))
         self.TraceScanTimems.grid(row=0, column=tc, padx=2)
         tc += 1
-        ###表示範囲切替ボタン
+        ###表示範囲切替ボタン（位置は_adjust_layout()でplace配置）
         self.WinWidthButton = tk.Button(toolbar_frame, text="▶", command=lambda: Bind.WinWidthSwitch())
-        self.WinWidthButton.grid(row=0, column=tc, padx=2)
-        tc += 1
-        # 右寄せ用スペーサー
-        spacer = tk.Label(toolbar_frame, text="")
-        spacer.grid(row=0, column=tc, sticky="ew")
-        toolbar_frame.grid_columnconfigure(tc, weight=1)
-        tc += 1
+
+        # 右側ボタン群（固定位置にplace配置するため専用フレームにまとめる）
+        self.right_toolbar = tk.Frame(toolbar_frame)
         # 通信設定ボタン
-        self.changePageButton = tk.Button(toolbar_frame, text="通信設定", command=lambda: ConectConfdef())
-        self.changePageButton.grid(row=0, column=tc, padx=2)
-        tc += 1
+        self.changePageButton = tk.Button(self.right_toolbar, text="通信設定", command=lambda: ConectConfdef())
+        self.changePageButton.pack(side='left', padx=2, pady=2)
         # センサー設定ボタン
-        self.SensorConfButton = tk.Button(toolbar_frame, text="ｾﾝｻｰ設定", command=lambda: SensorConfdef())
-        self.SensorConfButton.grid(row=0, column=tc, padx=2)
-        tc += 1
+        self.SensorConfButton = tk.Button(self.right_toolbar, text="ｾﾝｻｰ設定", command=lambda: SensorConfdef())
+        self.SensorConfButton.pack(side='left', padx=2, pady=2)
         # IO設定クリアボタン
-        self.IOClearConfButton = tk.Button(toolbar_frame, text="IO設定ｸﾘｱ", command=lambda: Bind.IOConfClear())
-        self.IOClearConfButton.grid(row=0, column=tc, padx=2)
-        tc += 1
+        self.IOClearConfButton = tk.Button(self.right_toolbar, text="IO設定ｸﾘｱ", command=lambda: Bind.IOConfClear())
+        self.IOClearConfButton.pack(side='left', padx=2, pady=2)
         # ｴｸｽﾎﾟｰﾄボタン
-        self.ExportButton = tk.Button(toolbar_frame, text="ｴｸｽﾎﾟｰﾄ", command=lambda: InExeport.Export())
-        self.ExportButton.grid(row=0, column=tc, padx=2)
-        tc += 1
+        self.ExportButton = tk.Button(self.right_toolbar, text="ｴｸｽﾎﾟｰﾄ", command=lambda: InExeport.Export())
+        self.ExportButton.pack(side='left', padx=2, pady=2)
         # インポートボタン
-        self.InportButton = tk.Button(toolbar_frame, text="ｲﾝﾎﾟｰﾄ", command=lambda: InExeport.Inport())
-        self.InportButton.grid(row=0, column=tc, padx=2)
+        self.InportButton = tk.Button(self.right_toolbar, text="ｲﾝﾎﾟｰﾄ", command=lambda: InExeport.Inport())
+        self.InportButton.pack(side='left', padx=2, pady=2)
 
 #-----------------------------------canvas / main_frame--------------------
 
@@ -327,6 +320,35 @@ class App(tk.Tk):
 
         # 全ウィジェット構築完了後に表示
         self.deiconify()
+        self.update_idletasks()
+        self._adjust_layout()
+
+    def _adjust_layout(self):
+        """コメントテキストボックスの右端に合わせてWinWidthButtonと右側ボタン群を配置"""
+        self.update_idletasks()
+
+        # コメントテキストボックスの右端のx座標（ウィンドウ原点基準）
+        comment_rootx = self.CommentText[0].winfo_rootx()
+        root_rootx = self.winfo_rootx()
+        comment_right = comment_rootx - root_rootx + self.CommentText[0].winfo_width() + 2  # +2はpadx分
+
+        # ナローウィンドウ幅を更新（コメント右端＋縦スクロールバー幅）
+        gl.winwidth = comment_right + self.ybar.winfo_width()
+
+        # toolbar_frame内にWinWidthButtonをplace配置（右端がコメント右端に揃う）
+        toolbar_h = self.toolbar_frame_ref.winfo_height()
+        btn_w = self.WinWidthButton.winfo_reqwidth()
+        btn_h = self.WinWidthButton.winfo_reqheight()
+        btn_y = max(0, (toolbar_h - btn_h) // 2)
+        self.WinWidthButton.place(x=comment_right - btn_w, y=btn_y)
+
+        # 右側ボタン群をtoolbar_frame内の固定位置にplace配置（ウィンドウ最大幅の右端）
+        self.right_toolbar.update_idletasks()
+        right_w = self.right_toolbar.winfo_reqwidth()
+        right_h = self.right_toolbar.winfo_reqheight()
+        right_x = gl.winmaxwidth - right_w
+        right_y = max(0, (toolbar_h - right_h) // 2)
+        self.right_toolbar.place(x=right_x, y=right_y)
 
 def ConectConfdef():
     ConectConf.ConectConf()  
