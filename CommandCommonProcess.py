@@ -10,6 +10,14 @@ def AIToUser(AddDic,Address):
     User0 = int(AddDic[Address]['User0'])
     User100 = int(AddDic[Address]['User100'])
 
+    if AI100 == AI0 or User100 == User0:
+        messagebox.showinfo('スケーリング設定エラー',
+            f'アドレス[{Address}]のAIスケールまたはユーザースケールの\n'
+            '最大値と最小値が同じ値です。\n'
+            'スケーリング設定を確認してください。\nIO_R/Wを停止します。')
+        gl.IORWBusy = False
+        return
+
     '''
     if AddDic[Address]['RAIVal'] < AI0 :
         AddDic[Address]['RVal'] = User0
@@ -26,7 +34,15 @@ def UserToAI(AddDic,Address):
     AI100 = int(AddDic[Address]['AI100'])
     User0 = int(AddDic[Address]['User0'])
     User100 = int(AddDic[Address]['User100'])
-    
+
+    if User100 == User0:
+        messagebox.showinfo('スケーリング設定エラー',
+            f'アドレス[{Address}]のユーザースケールの\n'
+            '最大値と最小値が同じ値です。\n'
+            'スケーリング設定を確認してください。\nIO_R/Wを停止します。')
+        gl.IORWBusy = False
+        return
+
     '''
     if AddDic[Address]['WVal'] < User0 :
         AddDic[Address]['WAIVal'] = AI0
@@ -95,5 +111,7 @@ def RValueConv(Address,AddDic,BinaryValue) :
         AddValue, = unpack('f',BinaryValue)#4ﾊﾞｲﾄの実数
     #elif AddDic[Address]['Var'] == 'Float(16bit)':
     #    AddValue = unpack('e',BinaryValue)#2ﾊﾞｲﾄの実数
+    else:
+        AddValue = 0
 
     return AddValue
