@@ -3,7 +3,7 @@ import os
 
 #------------Const-------------
 #GUI
-winwidth = 750#変わらない？
+winwidth = 870
 winheight = 500
 winmaxwidth = 1100
 
