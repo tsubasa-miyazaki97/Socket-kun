@@ -26,8 +26,8 @@ class App(tk.Tk):
         # ウィンドウタイトルを決定
         self.title("IO読書")
 
-        # ウィンドウの大きさを決定
-        self.geometry(str(gl.winwidth)+"x"+str(gl.winheight))
+        # ウィンドウの大きさを決定（起動時はフル幅で全ボタン・テキストボックスを表示）
+        self.geometry(str(gl.winmaxwidth)+"x"+str(gl.winheight))
 
         # ツールバー行(row=0)は固定、キャンバス行(row=1)を伸縮
         self.grid_rowconfigure(0, weight=0)
@@ -87,8 +87,8 @@ class App(tk.Tk):
         self.TraceScanTimems = tk.Label(toolbar_frame, text='ms', font=(gl.deffont, gl.fsizes))
         self.TraceScanTimems.grid(row=0, column=tc, padx=2)
         tc += 1
-        ###表示範囲切替ボタン（位置は_adjust_layout()でplace配置）
-        self.WinWidthButton = tk.Button(toolbar_frame, text="▶", command=lambda: Bind.WinWidthSwitch())
+        ###表示範囲切替ボタン（位置は_adjust_layout()でplace配置）起動時はフル幅なので◀
+        self.WinWidthButton = tk.Button(toolbar_frame, text="◀", command=lambda: Bind.WinWidthSwitch())
 
         # 右側ボタン群（固定位置にplace配置するため専用フレームにまとめる）
         self.right_toolbar = tk.Frame(toolbar_frame)
@@ -332,8 +332,13 @@ class App(tk.Tk):
         root_rootx = self.winfo_rootx()
         comment_right = comment_rootx - root_rootx + self.CommentText[0].winfo_width() + 2  # +2はpadx分
 
+        # スクロールバー幅（winfo_reqwidth で確実に取得、未描画時(=1)はwinfo_widthで補完）
+        scrollbar_w = self.ybar.winfo_reqwidth()
+        if scrollbar_w <= 1:  # 1はtkinterの未初期化時のデフォルト値
+            scrollbar_w = self.ybar.winfo_width()
+
         # ナローウィンドウ幅を更新（コメント右端＋縦スクロールバー幅）
-        gl.winwidth = comment_right + self.ybar.winfo_width()
+        gl.winwidth = comment_right + scrollbar_w
 
         # toolbar_frame内にWinWidthButtonをplace配置（右端がコメント右端に揃う）
         toolbar_h = self.toolbar_frame_ref.winfo_height()
@@ -342,11 +347,17 @@ class App(tk.Tk):
         btn_y = max(0, (toolbar_h - btn_h) // 2)
         self.WinWidthButton.place(x=comment_right - btn_w, y=btn_y)
 
-        # 右側ボタン群をtoolbar_frame内の固定位置にplace配置（ウィンドウ最大幅の右端）
+        # 100%User値テキストボックスの右端のx座標（ウィンドウ原点基準）
+        user100_rootx = self.User100ValueText[0].winfo_rootx()
+        user100_right = user100_rootx - root_rootx + self.User100ValueText[0].winfo_width() + 2  # +2はpadx分
+
+        # 右側ボタン群をtoolbar_frame内にplace配置
+        # インポートボタン右端が100%ユーザー値テキストボックス右端に揃うよう配置。
+        # ただしWinWidthButtonと重なる場合はcomment_right（WinWidthButtonの右端）に揃える。
         self.right_toolbar.update_idletasks()
         right_w = self.right_toolbar.winfo_reqwidth()
         right_h = self.right_toolbar.winfo_reqheight()
-        right_x = gl.winmaxwidth - right_w
+        right_x = max(user100_right - right_w, comment_right)
         right_y = max(0, (toolbar_h - right_h) // 2)
         self.right_toolbar.place(x=right_x, y=right_y)
 
