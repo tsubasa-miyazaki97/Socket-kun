@@ -329,8 +329,12 @@ def ValueGet(ArrayAddress,AddDic,Response):
 
     HexResponse=Response.hex()#扱いやすい？ようにﾊﾞｲﾄ配列を16進に変換
     #WordとLongの総数
-    WordMax = int(HexResponse[14:16],16)
-    LongMax = int(HexResponse[16:18],16)#使わんかも
+    try:
+        WordMax = int(HexResponse[14:16],16)
+        LongMax = int(HexResponse[16:18],16)#使わんかも
+    except Exception as e:
+        print(f"ValueGetヘッダ解析エラー: {e}")
+        return
 
     #抜き取る時の番号
     WordCount = 0
@@ -338,35 +342,26 @@ def ValueGet(ArrayAddress,AddDic,Response):
     
     for n in range(len(ArrayAddress)):
         if ArrayAddress[n] != '' :
-            if AddDic[ArrayAddress[n]]['Var'] == 'Short' or AddDic[ArrayAddress[n]]['Var'] == 'UShort' :
-                WordCount += 1
-                HexValue = HexResponse[18+WordCount*4-4:18+WordCount*4]#切り出し
-            else:
-                LongCount += 1
-                HexValue = HexResponse[18+WordMax*4+LongCount*8-8:18+WordMax*4+LongCount*8]#Word総数分スキップして切り出し
+            try:
+                if AddDic[ArrayAddress[n]]['Var'] == 'Short' or AddDic[ArrayAddress[n]]['Var'] == 'UShort' :
+                    WordCount += 1
+                    HexValue = HexResponse[18+WordCount*4-4:18+WordCount*4]#切り出し
+                else:
+                    LongCount += 1
+                    HexValue = HexResponse[18+WordMax*4+LongCount*8-8:18+WordMax*4+LongCount*8]#Word総数分スキップして切り出し
 
-            BinaryValue = bytes.fromhex(HexValue)
-            AddValue = ComProc.RValueConv(ArrayAddress[n],AddDic,BinaryValue)
-            '''
-            if AddDic[ArrayAddress[n]]['Var'] == 'Short' :#型ごとにﾊﾞｲﾄ配列へ変換
-                AddValue = unpack('h',BinaryValue)#2ﾊﾞｲﾄの符号付き整数
-            elif AddDic[ArrayAddress[n]]['Var'] == 'UShort':
-                AddValue = unpack('H',BinaryValue)#2ﾊﾞｲﾄの符号無し整数
-            elif AddDic[ArrayAddress[n]]['Var'] == 'Long':
-                AddValue = unpack('l',BinaryValue)#4ﾊﾞｲﾄの符号付き整数
-            elif AddDic[ArrayAddress[n]]['Var'] == 'ULong':
-                AddValue = unpack('L',BinaryValue)#4ﾊﾞｲﾄの符号無し整数
-            elif AddDic[ArrayAddress[n]]['Var'] == 'Float':
-                AddValue = unpack('f',BinaryValue)#4ﾊﾞｲﾄの実数
-            '''
+                BinaryValue = bytes.fromhex(HexValue)
+                AddValue = ComProc.RValueConv(ArrayAddress[n],AddDic,BinaryValue)
 
-            AddDic[ArrayAddress[n]]['RAIVal'] = AddValue
-            
-            if AddDic[ArrayAddress[n]]['AI0'] != '' :
-                ComProc.AIToUser(AddDic,ArrayAddress[n])
-            else:
-                AddDic[ArrayAddress[n]]['RVal'] = AddDic[ArrayAddress[n]]['RAIVal']
-                #AddDic[ArrayAddress[n]]['RhVal'] = HexValue
+                AddDic[ArrayAddress[n]]['RAIVal'] = AddValue
+                
+                if AddDic[ArrayAddress[n]]['AI0'] != '' :
+                    ComProc.AIToUser(AddDic,ArrayAddress[n])
+                else:
+                    AddDic[ArrayAddress[n]]['RVal'] = AddDic[ArrayAddress[n]]['RAIVal']
+                    #AddDic[ArrayAddress[n]]['RhVal'] = HexValue
+            except Exception as e:
+                print(f"ValueGetエラー [{ArrayAddress[n]}]: {e}")
 
 
 
@@ -375,4 +370,4 @@ def ValueCheck(Response) :
     MidResponse = Response.hex()[2:]#ヘッダ部?除去
     if str(MidResponse).startswith('00'):#エラーコード無いこと
         return True
-    
+    return False

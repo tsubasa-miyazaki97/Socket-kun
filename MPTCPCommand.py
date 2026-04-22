@@ -191,41 +191,33 @@ def ValueGet(ArrayAddress,AddDic,Response):
 
     for n in range(len(ArrayAddress)):
         if ArrayAddress[n] != '' :
-            if AddDic[ArrayAddress[n]]['Var'] == 'Short' or AddDic[ArrayAddress[n]]['Var'] == 'UShort' :
-                WordCount += 1
-                Offset = 4
-            else:
-                LongCount += 1
-                Offset = 8
-            HexValue = HexResponse[24+16+WordCount*4+LongCount*8-Offset:24+16+WordCount*4+LongCount*8]#切り出し
+            try:
+                if AddDic[ArrayAddress[n]]['Var'] == 'Short' or AddDic[ArrayAddress[n]]['Var'] == 'UShort' :
+                    WordCount += 1
+                    Offset = 4
+                else:
+                    LongCount += 1
+                    Offset = 8
+                HexValue = HexResponse[24+16+WordCount*4+LongCount*8-Offset:24+16+WordCount*4+LongCount*8]#切り出し
 
-            BinaryValue = bytes.fromhex(HexValue)
+                BinaryValue = bytes.fromhex(HexValue)
 
-            AddValue = ComProc.RValueConv(ArrayAddress[n],AddDic,BinaryValue)
-            '''
-            if AddDic[ArrayAddress[n]]['Var'] == 'Short' :#型ごとにﾊﾞｲﾄ配列へ変換
-                AddValue = unpack('h',BinaryValue)#2ﾊﾞｲﾄの符号付き整数
-            elif AddDic[ArrayAddress[n]]['Var'] == 'UShort':
-                AddValue = unpack('H',BinaryValue)#2ﾊﾞｲﾄの符号無し整数
-            elif AddDic[ArrayAddress[n]]['Var'] == 'Long':
-                AddValue = unpack('l',BinaryValue)#4ﾊﾞｲﾄの符号付き整数
-            elif AddDic[ArrayAddress[n]]['Var'] == 'ULong':
-                AddValue = unpack('L',BinaryValue)#4ﾊﾞｲﾄの符号無し整数
-            elif AddDic[ArrayAddress[n]]['Var'] == 'Float':
-                AddValue = unpack('f',BinaryValue)#4ﾊﾞｲﾄの実数
-            '''
+                AddValue = ComProc.RValueConv(ArrayAddress[n],AddDic,BinaryValue)
 
-            AddDic[ArrayAddress[n]]['RAIVal'] = AddValue
-            
-            if AddDic[ArrayAddress[n]]['AI0'] != '' :
-                ComProc.AIToUser(AddDic,ArrayAddress[n])
-            else:
-                AddDic[ArrayAddress[n]]['RVal'] = AddDic[ArrayAddress[n]]['RAIVal']
-                #AddDic[ArrayAddress[n]]['RhVal'] = HexValue
+                AddDic[ArrayAddress[n]]['RAIVal'] = AddValue
+                
+                if AddDic[ArrayAddress[n]]['AI0'] != '' :
+                    ComProc.AIToUser(AddDic,ArrayAddress[n])
+                else:
+                    AddDic[ArrayAddress[n]]['RVal'] = AddDic[ArrayAddress[n]]['RAIVal']
+                    #AddDic[ArrayAddress[n]]['RhVal'] = HexValue
+            except Exception as e:
+                print(f"ValueGetエラー [{ArrayAddress[n]}]: {e}")
 
 def ValueCheck(Response) :
     MidResponse = Response.hex()[24:]#ヘッダ部除去
     MidResponse = MidResponse[10:]#LengthとFCとCPU番号除去
     if str(MidResponse).startswith('00'):#エラーコードが無いこと
         return True
+    return False
 

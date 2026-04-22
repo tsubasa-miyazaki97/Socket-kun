@@ -108,8 +108,8 @@ def Test():
                         Result = Result + 'デバイスNo'+ str(i) + ' : 接続OK\n'
                         #接続解除
                         loop.run_until_complete(client.disconnect())
-                    except :
-                        Result = Result + 'デバイスNo'+ str(i) + ' : 接続NG\nIP,PORT,パソコンの設定,LANの確認をしてください。\n'
+                    except Exception as e:
+                        Result = Result + 'デバイスNo'+ str(i) + ' : 接続NG\nIP,PORT,パソコンの設定,LANの確認をしてください。\n(' + str(e) + ')\n'
                     finally:
                         loop.close()
 

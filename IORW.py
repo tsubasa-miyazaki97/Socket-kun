@@ -162,14 +162,24 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
             client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
             time.sleep(0.1)#これ抜くと安川がSendで接続切られる
             client.settimeout(1)#レシーブ時1Sでタイムアウト
-            client.connect((host, port))
+            try:
+                client.connect((host, port))
+            except (socket.timeout, ConnectionResetError, OSError) as e:
+                messagebox.showinfo('接続エラー', f'デバイスNo{DeviceNo+1}への接続に失敗しました。\n({e})')
+                client.close()
+                return
             
             if gl.DeviceConfDic[DeviceNo]['Device'] == gl.DeviceList[2]:#CJだけ最初に別処理
                 gl.CJMemory = ''
                 gl.CJMinAddress = 6144
                 gl.CJMaxAddress = 0
-                client.send(bytes.fromhex(gl.CJInitHeader))
-                Response = client.recv(1024)
+                try:
+                    client.send(bytes.fromhex(gl.CJInitHeader))
+                    Response = client.recv(1024)
+                except (socket.timeout, ConnectionResetError, OSError) as e:
+                    messagebox.showinfo('通信エラー', f'デバイスNo{DeviceNo+1}との初期通信が失敗しました。\n({e})')
+                    client.close()
+                    return
                 if len(Response.hex()) != 24*2 or Response.hex()[12*2:16*2] != '00000000' :
                     messagebox.showinfo('CJInitレスポンスエラー','読込結果がエラーでした。宮崎に言ってください') 
                     return
@@ -187,7 +197,9 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
             try :
                 loop.run_until_complete(client.connect())
             except Exception as e:
-                print(f"接続エラー: {e}")
+                messagebox.showinfo('接続エラー', f'デバイスNo{DeviceNo+1}への接続に失敗しました。\n({e})')
+                loop.close()
+                return
                 
             objects = client.get_objects_node()
             children = loop.run_until_complete(objects.get_children())
@@ -225,8 +237,13 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
         #最初の読込
     if gl.DeviceConfDic[DeviceNo]['Device'] != "ﾀﾞﾐｰ(接続先無)":#Dummy以外処理 :
         if gl.DeviceConfDic[DeviceNo]['Device'] != gl.DeviceList[4] :#Socket
-            client.send(ReadCommand)
-            Response = client.recv(1024)
+            try:
+                client.send(ReadCommand)
+                Response = client.recv(1024)
+            except (socket.timeout, ConnectionResetError, OSError) as e:
+                messagebox.showinfo('通信エラー', f'デバイスNo{DeviceNo+1}との初回読込が失敗しました。\n({e})')
+                client.close()
+                return
             if not Command.ValueCheck(Response)  :
                 messagebox.showinfo('レスポンスエラー1','読込結果がエラーでした。宮崎に言ってください') 
                 return
@@ -234,7 +251,8 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
             try :
                 Response = loop.run_until_complete(client.read_values(ReadCommand))
             except Exception as e:
-                print(f"読み出しエラー: {e}")
+                messagebox.showinfo('通信エラー', f'デバイスNo{DeviceNo+1}との初回読込が失敗しました。\n({e})')
+                return
             Result = Command.ValueCheck(Response,ArrayAddress)
             if Result != ""  :
                 messagebox.showinfo('読み込みエラー1',f'[{Result}]の読込結果がNone(読込失敗)でした。変数名を確認してください') 
@@ -264,8 +282,13 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
         WriteCommand = Command.Convert(ArrayAddress,AddDic,True)
         if WriteCommand != '':
             if gl.DeviceConfDic[DeviceNo]['Device'] != gl.DeviceList[4] :#Socket
-                client.send(WriteCommand)
-                Response = client.recv(1024)
+                try:
+                    client.send(WriteCommand)
+                    Response = client.recv(1024)
+                except (socket.timeout, ConnectionResetError, OSError) as e:
+                    messagebox.showinfo('通信エラー', f'デバイスNo{DeviceNo+1}との初回書込みが失敗しました。\n({e})')
+                    client.close()
+                    return
                 if not Command.ValueCheck(Response)  :
                     messagebox.showinfo('レスポンスエラー2','書込結果がエラーでした。宮崎に言ってください') 
                     return
@@ -276,7 +299,8 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
                     try :
                         loop.run_until_complete(client.write_values(nodes, write_values))
                     except Exception as e:
-                        print(f"書き込みエラー: {e}")
+                        messagebox.showinfo('通信エラー', f'デバイスNo{DeviceNo+1}への初回書込みが失敗しました。\n({e})')
+                        return
                 
         
     now = time.time()
@@ -298,7 +322,8 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
                 try :
                     Response = loop.run_until_complete(client.read_values(ReadCommand))
                 except Exception as e:
-                    print(f"読み出しエラー: {e}")
+                    messagebox.showinfo('通信エラー', f'デバイスNo{DeviceNo+1}との読込が失敗しました。\n({e})')
+                    break
                 Result = Command.ValueCheck(Response,ArrayAddress)
                 if Result != ""  :
                     messagebox.showinfo('読み込みエラー3',f'[{Result}]の読込結果がNone(読込失敗)でした。変数名を確認してください') 
@@ -336,7 +361,8 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
                         try :
                             loop.run_until_complete(client.write_values(nodes, write_values))
                         except Exception as e:
-                            print(f"書き込みエラー: {e}")
+                            messagebox.showinfo('通信エラー', f'デバイスNo{DeviceNo+1}への書込みが失敗しました。\n({e})')
+                            break
 
         elif gl.DeviceConfDic[DeviceNo]['Device'] == "ﾀﾞﾐｰ(接続先無)":#Dummy処理 :
             WriteCommand = Command.Convert(ArrayAddress,AddDic,True)
@@ -354,7 +380,12 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
         if gl.DeviceConfDic[DeviceNo]['Device'] != gl.DeviceList[4] :#Socket
             client.close()
         elif gl.DeviceConfDic[DeviceNo]['Device'] == gl.DeviceList[4] :#OPCUA
-            loop.run_until_complete(client.disconnect())
+            try:
+                loop.run_until_complete(client.disconnect())
+            except Exception as e:
+                print(f"切断エラー: {e}")
+            finally:
+                loop.close()
     
 
 def ValueUpdate():
