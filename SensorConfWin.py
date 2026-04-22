@@ -108,11 +108,6 @@ def SensorConf() :
         gl.app.DisableCheck    = [None] * gl.ChMax
         gl.app.DisableVal      = [None] * gl.ChMax
 
-        # 未構築行のデフォルト空値 (BackUp / ConfClear で使用)
-        _EMPTY_ROW = {'Sensor':'','In1':'','In2':'','Out1':'','Out2':'',
-                      'Out1Inv':False,'Out2Inv':False,'DigitsCoef':'',
-                      'CalcCoef':'','Ratio':'','TimeLag':'','Disable':False}
-
         # 最初のバッチは大きめにして初期表示を速くする
         FIRST_BATCH = 40
         BATCH       = 50
@@ -133,6 +128,7 @@ def SensorConf() :
 
                 lbl = tk.Label(gl.app.SensorFrame, text=i, font=(deffont, fsizes))
                 lbl.grid(row=r, column=C_NO, padx=2)
+                lbl.bind("<MouseWheel>", lambda event, a=canvas: Bind.mouse_y_scroll(event, a, None))
                 gl.app.SensorNolabel[idx] = lbl
 
                 combo = ttk.Combobox(gl.app.SensorFrame, values=gl.SensorList, font=(deffont, fsizes), width=8)
@@ -169,12 +165,14 @@ def SensorConf() :
                 out1inv_val   = tk.BooleanVar()
                 out1inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out1inv_val)
                 out1inv_check.grid(row=r, column=C_OUT1INV, padx=2)
+                out1inv_check.bind("<MouseWheel>", lambda event, a=canvas: Bind.mouse_y_scroll(event, a, None))
                 gl.app.Out1InvVal[idx]   = out1inv_val
                 gl.app.Out1InvCheck[idx] = out1inv_check
 
                 out2inv_val   = tk.BooleanVar()
                 out2inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out2inv_val)
                 out2inv_check.grid(row=r, column=C_OUT2INV, padx=2)
+                out2inv_check.bind("<MouseWheel>", lambda event, a=canvas: Bind.mouse_y_scroll(event, a, None))
                 gl.app.Out2InvVal[idx]   = out2inv_val
                 gl.app.Out2InvCheck[idx] = out2inv_check
 
@@ -205,6 +203,7 @@ def SensorConf() :
                 disable_val   = tk.BooleanVar()
                 disable_check = ttk.Checkbutton(gl.app.SensorFrame, variable=disable_val)
                 disable_check.grid(row=r, column=C_DISABLE, padx=2)
+                disable_check.bind("<MouseWheel>", lambda event, a=canvas: Bind.mouse_y_scroll(event, a, None))
                 gl.app.DisableVal[idx]   = disable_val
                 gl.app.DisableCheck[idx] = disable_check
 
