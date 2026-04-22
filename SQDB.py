@@ -93,11 +93,12 @@ def BackUp():
                         (i,gl.DeviceConfDic[i]['Device'],gl.DeviceConfDic[i]['IPAddress'],str(gl.DeviceConfDic[i]['Port'])))
 
     for i in range(gl.ChMax):
-        gl.Cur.execute("REPLACE INTO IOConf VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",\
-                        (i,gl.app.DeviceNoCombo[i].get(),gl.app.AddressText[i].get(),gl.app.InitValueText[i].get(),\
-                        gl.app.UDValueText[i].get(),gl.app.CommentText[i].get(),gl.app.VarTypecombo[i].get(),gl.app.AI0ValueText[i].get(),\
-                        gl.app.AI100ValueText[i].get(),gl.app.User0ValueText[i].get(),gl.app.User100ValueText[i].get(),\
-                        str(gl.IOConfDic[i].get('CurrentVal', '') if isinstance(gl.IOConfDic[i], dict) else '')))
+        d = gl.IOConfDic[i] if isinstance(gl.IOConfDic[i], dict) else {}
+        gl.Cur.execute("REPLACE INTO IOConf VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (i, d.get('DeviceNo',''), d.get('Address',''), d.get('Init',''),
+                         d.get('UpDown',''), d.get('Comment',''), d.get('VarType',''),
+                         d.get('AI0',''), d.get('AI100',''), d.get('User0',''),
+                         d.get('User100',''), d.get('CurrentVal','')))
 
     for i in range(gl.ChMax):
         gl.Cur.execute("REPLACE INTO SensorConf VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",\

@@ -39,25 +39,28 @@ def IORW():
                 AddressDic[i-1] = []
 
         for i in gl.EnableCh :
-            if gl.app.DeviceNoCombo[i-1].get() != "" :#ﾃﾞﾊﾞｲｽNoで振り分け
+            d = gl.IOConfDic[i-1] if isinstance(gl.IOConfDic[i-1], dict) else {}
+            dn_str = d.get('DeviceNo', '')
+            if dn_str != '' :#ﾃﾞﾊﾞｲｽNoで振り分け
 
-                DeviceNo = int(gl.app.DeviceNoCombo[i-1].get())-1
-                Address = gl.app.AddressText[i-1].get()
+                DeviceNo = int(dn_str) - 1
+                Address  = d.get('Address', '')
 
-                if not DeviceNo in gl.AllAddDic.keys() :
-                    gl.AllAddDic[DeviceNo]={}
-                if not gl.app.AddressText[i-1].get() in gl.AllAddDic[DeviceNo].keys() :
+                if not DeviceNo in gl.AllAddDic.keys():
+                    gl.AllAddDic[DeviceNo] = {}
+                if Address not in gl.AllAddDic[DeviceNo].keys():
                     DeviceListDic[DeviceNo]['DeviceCnt'] += 1
                     AddressDic[DeviceNo].append(Address)
-                    savedVal = gl.IOConfDic[i-1].get('CurrentVal', '') if isinstance(gl.IOConfDic[i-1], dict) else ''
+                    savedVal = d.get('CurrentVal', '')
                     try:
                         initRVal = float(savedVal) if savedVal not in ('', None) else 0
                     except (ValueError, TypeError):
                         initRVal = 0
-                    gl.AllAddDic[DeviceNo][Address]= \
-                        {'Var':gl.app.VarTypecombo[i-1].get(),'RVal':initRVal,'WVal':0,'Ch':i-1,'RAIVal':0,'WAIVal':0,'WFlag':False,\
-                        'AI0':gl.app.AI0ValueText[i-1].get(),'AI100':gl.app.AI100ValueText[i-1].get(),\
-                        'User0':gl.app.User0ValueText[i-1].get(),'User100':gl.app.User100ValueText[i-1].get()} 
+                    gl.AllAddDic[DeviceNo][Address] = \
+                        {'Var': d.get('VarType', ''), 'RVal': initRVal, 'WVal': 0, 'Ch': i-1,
+                         'RAIVal': 0, 'WAIVal': 0, 'WFlag': False,
+                         'AI0':    d.get('AI0', ''),   'AI100':   d.get('AI100', ''),
+                         'User0':  d.get('User0', ''), 'User100': d.get('User100', '')} 
                 
         for i in gl.EnableDevice:#無入力ﾁｪｯｸ
             if DeviceListDic[i-1]['DeviceCnt'] != 0:
@@ -101,11 +104,12 @@ def IORW():
         gl.app.SensorConfButton['state']='disabled'
         gl.app.IOClearConfButton['state']='disabled'
         for i in gl.EnableCh:
-            gl.app.DeviceNoCombo[i-1]['state']='disabled'
-            gl.app.AddressText[i-1]['state']='disabled'
-            gl.app.VarTypecombo[i-1]['state']='disabled'
-            gl.app.ValueUpButton[i-1]['state']='normal'
-            gl.app.ValueDownButton[i-1]['state']='normal'
+            if gl.app.DeviceNoCombo[i-1] is not None:
+                gl.app.DeviceNoCombo[i-1]['state']='disabled'
+                gl.app.AddressText[i-1]['state']='disabled'
+                gl.app.VarTypecombo[i-1]['state']='disabled'
+                gl.app.ValueUpButton[i-1]['state']='normal'
+                gl.app.ValueDownButton[i-1]['state']='normal'
 
         gl.app.Periodcombo.current(0)
 
@@ -135,11 +139,12 @@ def IORW():
         gl.app.SensorConfButton['state']='normal'
         gl.app.IOClearConfButton['state']='normal'
         for i in gl.EnableCh:
-            gl.app.DeviceNoCombo[i-1]['state']='normal'
-            gl.app.AddressText[i-1]['state']='normal'
-            gl.app.VarTypecombo[i-1]['state']='normal'
-            gl.app.ValueUpButton[i-1]['state']='disabled'
-            gl.app.ValueDownButton[i-1]['state']='disabled'
+            if gl.app.DeviceNoCombo[i-1] is not None:
+                gl.app.DeviceNoCombo[i-1]['state']='normal'
+                gl.app.AddressText[i-1]['state']='normal'
+                gl.app.VarTypecombo[i-1]['state']='normal'
+                gl.app.ValueUpButton[i-1]['state']='disabled'
+                gl.app.ValueDownButton[i-1]['state']='disabled'
         gl.app.ScanTime['text'] = '0'
 
         
@@ -242,8 +247,14 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
     #初期値反映
     for n in range(len(ArrayAddress)):
         if ArrayAddress[n] != '':
-            if gl.app.InitValueText[AddDic[ArrayAddress[n]]['Ch']].get() != '':#初期値テキストありなら反映
-                AddDic[ArrayAddress[n]]['WVal'] = float(gl.app.InitValueText[AddDic[ArrayAddress[n]]['Ch']].get())
+            _ch = AddDic[ArrayAddress[n]]['Ch']
+            if gl.app.InitValueText[_ch] is not None:
+                _init_val = gl.app.InitValueText[_ch].get()
+            else:
+                _d = gl.IOConfDic[_ch] if isinstance(gl.IOConfDic[_ch], dict) else {}
+                _init_val = _d.get('Init', '')
+            if _init_val != '':#初期値テキストありなら反映
+                AddDic[ArrayAddress[n]]['WVal'] = float(_init_val)
                 AddDic[ArrayAddress[n]]['WFlag'] = True
             else :
                 AddDic[ArrayAddress[n]]['WVal'] = AddDic[ArrayAddress[n]]['RVal']
@@ -349,12 +360,19 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
 def ValueUpdate():
     if not gl.IORWBusy:
         return
-    ## ﾌｫｰﾑの値変更
+    ## ﾌｫｰﾑの値変更（gl.IOConfDic を参照するので未描画行でも安全）
     for i in gl.EnableCh:
-        if gl.app.DeviceNoCombo[i-1].get() != '':
-            if gl.ValueText[i-1] != gl.AllAddDic[int(gl.app.DeviceNoCombo[i-1].get())-1][gl.app.AddressText[i-1].get()]['RVal'] :
-                if not gl.ValueTextFocus[i-1] :
-                    gl.ValueText[i-1].set(gl.AllAddDic[int(gl.app.DeviceNoCombo[i-1].get())-1][gl.app.AddressText[i-1].get()]['RVal'])
+        d = gl.IOConfDic[i-1] if isinstance(gl.IOConfDic[i-1], dict) else {}
+        dn_str = d.get('DeviceNo', '')
+        addr   = d.get('Address', '')
+        if dn_str != '' and addr != '':
+            try:
+                rval = gl.AllAddDic[int(dn_str)-1][addr]['RVal']
+                if not gl.ValueTextFocus[i-1]:
+                    if hasattr(gl.ValueText[i-1], 'set'):
+                        gl.ValueText[i-1].set(rval)
+            except (KeyError, ValueError, TypeError):
+                pass
     gl.app.after(16, ValueUpdate)  # 約60fps(16ms)でUIを更新
 
 
@@ -376,24 +394,46 @@ def SensorCorrect(now):
             SenProc.BitCalcOut(i,now)
 
 def BackUp():
-    #変数に値格納
+    # 描画済み行はウィジェットから読む。未描画行は gl.IOConfDic の既存値を維持（CurrentVal のみ AllAddDic から更新）
     for i in range(gl.ChMax):
         currentVal = ''
         try:
             if isinstance(gl.IOConfDic[i], dict):
                 currentVal = gl.IOConfDic[i].get('CurrentVal', '')
-            deviceNo = gl.app.DeviceNoCombo[i].get()
-            address = gl.app.AddressText[i].get()
-            if deviceNo != '' and address != '':
-                dn = int(deviceNo) - 1
-                if dn in gl.AllAddDic and address in gl.AllAddDic[dn]:
-                    currentVal = str(gl.AllAddDic[dn][address]['WVal'])
+            if gl.app.DeviceNoCombo[i] is None:
+                # 未描画行: AllAddDic から CurrentVal だけ更新
+                d = gl.IOConfDic[i] if isinstance(gl.IOConfDic[i], dict) else {}
+                dn_str = d.get('DeviceNo', '')
+                addr   = d.get('Address', '')
+                if dn_str != '' and addr != '':
+                    dn = int(dn_str) - 1
+                    if dn in gl.AllAddDic and addr in gl.AllAddDic[dn]:
+                        currentVal = str(gl.AllAddDic[dn][addr]['WVal'])
+                if isinstance(gl.IOConfDic[i], dict):
+                    gl.IOConfDic[i]['CurrentVal'] = currentVal
+            else:
+                # 描画済み行: ウィジェットから読む
+                deviceNo = gl.app.DeviceNoCombo[i].get()
+                address  = gl.app.AddressText[i].get()
+                if deviceNo != '' and address != '':
+                    dn = int(deviceNo) - 1
+                    if dn in gl.AllAddDic and address in gl.AllAddDic[dn]:
+                        currentVal = str(gl.AllAddDic[dn][address]['WVal'])
+                gl.IOConfDic[i] = {
+                    'DeviceNo': gl.app.DeviceNoCombo[i].get(),
+                    'Address':  gl.app.AddressText[i].get(),
+                    'Init':     gl.app.InitValueText[i].get(),
+                    'UpDown':   gl.app.UDValueText[i].get(),
+                    'Comment':  gl.app.CommentText[i].get(),
+                    'VarType':  gl.app.VarTypecombo[i].get(),
+                    'AI0':      gl.app.AI0ValueText[i].get(),
+                    'AI100':    gl.app.AI100ValueText[i].get(),
+                    'User0':    gl.app.User0ValueText[i].get(),
+                    'User100':  gl.app.User100ValueText[i].get(),
+                    'CurrentVal': currentVal,
+                }
         except (ValueError, KeyError, TypeError):
             pass
-        gl.IOConfDic[i] = {'DeviceNo':gl.app.DeviceNoCombo[i].get(),'Address':gl.app.AddressText[i].get(),'Init':gl.app.InitValueText[i].get(),\
-                        'UpDown':gl.app.UDValueText[i].get(),'Comment':gl.app.CommentText[i].get(),'VarType':gl.app.VarTypecombo[i].get(),'AI0':gl.app.AI0ValueText[i].get(),\
-                        'AI100':gl.app.AI100ValueText[i].get(),'User0':gl.app.User0ValueText[i].get(),'User100':gl.app.User100ValueText[i].get(),\
-                        'CurrentVal':currentVal}
 
 def EnableCheck():
     

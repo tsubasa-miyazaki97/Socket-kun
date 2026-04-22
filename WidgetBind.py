@@ -158,18 +158,27 @@ def IOConfClear():
     if not messagebox.askyesno('IO設定クリア','現在の入力をクリアしますか？') :
         return
 
-    #各ウィジェットｸﾘｱ
-    for i in range(1,gl.ChMax+1) :
-        gl.app.DeviceNoCombo[i-1].set('')
-        gl.app.AddressText[i-1].delete(0,tk.END)
-        gl.app.InitValueText[i-1].delete(0,tk.END)
-        gl.app.UDValueText[i-1].delete(0,tk.END)
-        gl.app.CommentText[i-1].delete(0,tk.END)
-        gl.app.VarTypecombo[i-1].delete(0,tk.END)
-        gl.app.AI0ValueText[i-1].delete(0,tk.END)
-        gl.app.AI100ValueText[i-1].delete(0,tk.END)
-        gl.app.User0ValueText[i-1].delete(0,tk.END)
-        gl.app.User100ValueText[i-1].delete(0,tk.END)
+    # gl.IOConfDic をクリア（全行）
+    for i in range(gl.ChMax):
+        if isinstance(gl.IOConfDic[i], dict):
+            for k in ['DeviceNo','Address','Init','UpDown','Comment','VarType','AI0','AI100','User0','User100','CurrentVal']:
+                gl.IOConfDic[i][k] = ''
+        if hasattr(gl.ValueText[i], 'set'):
+            gl.ValueText[i].set('')
+
+    # 描画済みウィジェットのみクリア
+    for i in range(gl.ChMax):
+        if gl.app.DeviceNoCombo[i] is not None:
+            gl.app.DeviceNoCombo[i].set('')
+            gl.app.AddressText[i].delete(0,tk.END)
+            gl.app.InitValueText[i].delete(0,tk.END)
+            gl.app.UDValueText[i].delete(0,tk.END)
+            gl.app.CommentText[i].delete(0,tk.END)
+            gl.app.VarTypecombo[i].set('')
+            gl.app.AI0ValueText[i].delete(0,tk.END)
+            gl.app.AI100ValueText[i].delete(0,tk.END)
+            gl.app.User0ValueText[i].delete(0,tk.END)
+            gl.app.User100ValueText[i].delete(0,tk.END)
 
 
 def WinWidthSwitch() :

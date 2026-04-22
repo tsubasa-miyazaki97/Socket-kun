@@ -21,17 +21,31 @@ def Export():
         ExportDic[i]['Port']=str(gl.DeviceConfDic[i]['Port'])
         
     for i in range(gl.ChMax):
-        ExportDic[i]['DeviceNo'] = gl.app.DeviceNoCombo[i].get()
-        ExportDic[i]['Address']=gl.app.AddressText[i].get()
-        ExportDic[i]['Init']=gl.app.InitValueText[i].get()
-        ExportDic[i]['UpDown']=gl.app.UDValueText[i].get()
-        ExportDic[i]['Comment']=gl.app.CommentText[i].get()
-        ExportDic[i]['VarType']=gl.app.VarTypecombo[i].get()
-        ExportDic[i]['AI0']=gl.app.AI0ValueText[i].get()
-        ExportDic[i]['AI100']=gl.app.AI100ValueText[i].get()
-        ExportDic[i]['User0']=gl.app.User0ValueText[i].get()
-        ExportDic[i]['User100']=gl.app.User100ValueText[i].get()
-        ExportDic[i]['CurrentVal']=str(gl.IOConfDic[i].get('CurrentVal', '') if isinstance(gl.IOConfDic[i], dict) else '')
+        if gl.app.DeviceNoCombo[i] is not None:
+            ExportDic[i]['DeviceNo']   = gl.app.DeviceNoCombo[i].get()
+            ExportDic[i]['Address']    = gl.app.AddressText[i].get()
+            ExportDic[i]['Init']       = gl.app.InitValueText[i].get()
+            ExportDic[i]['UpDown']     = gl.app.UDValueText[i].get()
+            ExportDic[i]['Comment']    = gl.app.CommentText[i].get()
+            ExportDic[i]['VarType']    = gl.app.VarTypecombo[i].get()
+            ExportDic[i]['AI0']        = gl.app.AI0ValueText[i].get()
+            ExportDic[i]['AI100']      = gl.app.AI100ValueText[i].get()
+            ExportDic[i]['User0']      = gl.app.User0ValueText[i].get()
+            ExportDic[i]['User100']    = gl.app.User100ValueText[i].get()
+            ExportDic[i]['CurrentVal'] = str(gl.IOConfDic[i].get('CurrentVal', '') if isinstance(gl.IOConfDic[i], dict) else '')
+        else:
+            d = gl.IOConfDic[i] if isinstance(gl.IOConfDic[i], dict) else {}
+            ExportDic[i]['DeviceNo']   = d.get('DeviceNo', '')
+            ExportDic[i]['Address']    = d.get('Address', '')
+            ExportDic[i]['Init']       = d.get('Init', '')
+            ExportDic[i]['UpDown']     = d.get('UpDown', '')
+            ExportDic[i]['Comment']    = d.get('Comment', '')
+            ExportDic[i]['VarType']    = d.get('VarType', '')
+            ExportDic[i]['AI0']        = d.get('AI0', '')
+            ExportDic[i]['AI100']      = d.get('AI100', '')
+            ExportDic[i]['User0']      = d.get('User0', '')
+            ExportDic[i]['User100']    = d.get('User100', '')
+            ExportDic[i]['CurrentVal'] = str(d.get('CurrentVal', ''))
     for i in range(gl.ChMax):
         ExportDic[i]['Sensor']=gl.SensorConfDic[i]['Sensor']
         ExportDic[i]['In1']=gl.SensorConfDic[i]['In1']
@@ -104,28 +118,23 @@ def Inport():
         gl.DeviceConfDic[i]['Port']=data[i]['Port']
         
     for i in range(ChMax):
-        gl.app.DeviceNoCombo[i].set('')
-        gl.app.AddressText[i].delete(0,tk.END)
-        gl.app.InitValueText[i].delete(0,tk.END)
-        gl.app.UDValueText[i].delete(0,tk.END)
-        gl.app.CommentText[i].delete(0,tk.END)
-        gl.app.VarTypecombo[i].set('')
-        gl.app.AI0ValueText[i].delete(0,tk.END)
-        gl.app.AI100ValueText[i].delete(0,tk.END)
-        gl.app.User0ValueText[i].delete(0,tk.END)
-        gl.app.User100ValueText[i].delete(0,tk.END)
-        
-        gl.app.DeviceNoCombo[i].insert(0,data[i]['DeviceNo'])
-        gl.app.AddressText[i].insert(0,data[i]['Address'])
-        gl.app.InitValueText[i].insert(0,data[i]['Init'])
-        gl.app.UDValueText[i].insert(0,data[i]['UpDown'])
-        gl.app.CommentText[i].insert(0,data[i]['Comment'])
-        gl.app.VarTypecombo[i].insert(0,data[i]['VarType'])
-        gl.app.AI0ValueText[i].insert(0,data[i]['AI0'])
-        gl.app.AI100ValueText[i].insert(0,data[i]['AI100'])
-        gl.app.User0ValueText[i].insert(0,data[i]['User0'])
-        gl.app.User100ValueText[i].insert(0,data[i]['User100'])
-        gl.IOConfDic[i]['CurrentVal'] = data[i].get('CurrentVal', '')
+        if isinstance(gl.IOConfDic[i], dict):
+            gl.IOConfDic[i]['DeviceNo']   = data[i]['DeviceNo']
+            gl.IOConfDic[i]['Address']    = data[i]['Address']
+            gl.IOConfDic[i]['Init']       = data[i]['Init']
+            gl.IOConfDic[i]['UpDown']     = data[i]['UpDown']
+            gl.IOConfDic[i]['Comment']    = data[i]['Comment']
+            gl.IOConfDic[i]['VarType']    = data[i]['VarType']
+            gl.IOConfDic[i]['AI0']        = data[i]['AI0']
+            gl.IOConfDic[i]['AI100']      = data[i]['AI100']
+            gl.IOConfDic[i]['User0']      = data[i]['User0']
+            gl.IOConfDic[i]['User100']    = data[i]['User100']
+            gl.IOConfDic[i]['CurrentVal'] = data[i].get('CurrentVal', '')
+        if hasattr(gl.ValueText[i], 'set'):
+            gl.ValueText[i].set(data[i].get('CurrentVal', ''))
+
+    # 描画済み行のウィジェットを更新
+    gl.app.refresh_rendered_rows()
 
     for i in range(ChMax):
         gl.SensorConfDic[i]['Sensor']=data[i]['Sensor']

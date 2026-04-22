@@ -149,171 +149,239 @@ class App(tk.Tk):
         C_USER0     = 12
         C_USER100   = 13
 
-#-----------------------------------ヘッダー行 (row=0)--------------------
+#-----------------------------------データ行 バーチャルスクロール---------------
 
-        self.ChNoLabel = tk.Label(self.main_frame, text="ChNo", font=(gl.deffont, gl.fsizes))
-        self.ChNoLabel.grid(row=0, column=C_CHNO, padx=2, pady=2)
+        # 全行分 StringVar を先に生成（未描画行でも ValueUpdate が .set() できるように）
+        for _i in range(gl.ChMax):
+            gl.ValueText[_i] = tk.StringVar()
+            _cv = gl.IOConfDic[_i].get('CurrentVal', '') if isinstance(gl.IOConfDic[_i], dict) else ''
+            if _cv:
+                gl.ValueText[_i].set(_cv)
 
-        self.DeviceNoLabel = tk.Label(self.main_frame, text="ﾃﾞﾊﾞｲｽNo", font=(gl.deffont, gl.fsizes))
-        self.DeviceNoLabel.grid(row=0, column=C_DEVICENO, padx=2, pady=2)
+        # ウィジェットリストを None で初期化（未描画行は None のまま）
+        self.Nolabel          = [None] * gl.ChMax
+        self.DeviceNoCombo    = [None] * gl.ChMax
+        self.AddressText      = [None] * gl.ChMax
+        self.ValueText        = [None] * gl.ChMax
+        self.ValueUpButton    = [None] * gl.ChMax
+        self.ValueDownButton  = [None] * gl.ChMax
+        self.UDValueText      = [None] * gl.ChMax
+        self.InitValueText    = [None] * gl.ChMax
+        self.CommentText      = [None] * gl.ChMax
+        self.VarTypecombo     = [None] * gl.ChMax
+        self.AI0ValueText     = [None] * gl.ChMax
+        self.AI100ValueText   = [None] * gl.ChMax
+        self.User0ValueText   = [None] * gl.ChMax
+        self.User100ValueText = [None] * gl.ChMax
 
-        self.RWAddressLabel = tk.Label(self.main_frame, text="読書ｱﾄﾞﾚｽ", font=(gl.deffont, gl.fsizes))
-        self.RWAddressLabel.grid(row=0, column=C_ADDRESS, padx=2, pady=2)
+        # ---- バーチャルスクロール状態 ----
+        _rendered        = set()   # 生成済み行番号 (1-based)
+        _row_h           = [32]    # 実測行高さ [px]（update_idletasks 後に更新）
+        _BUFFER          = 3       # 上下バッファ行数
+        _scroll_after_id = [None]
 
-        self.ValueLabel = tk.Label(self.main_frame, text="現在値", font=(gl.deffont, gl.fsizes))
-        self.ValueLabel.grid(row=0, column=C_VALUE, padx=2, pady=2)
+        def _schedule_update():
+            if _scroll_after_id[0] is not None:
+                self.after_cancel(_scroll_after_id[0])
+            _scroll_after_id[0] = self.after(150, _update_visible_rows)
 
-        self.ValueUDLabel = tk.Label(self.main_frame, text="増減ﾎﾞﾀﾝ", font=(gl.deffont, gl.fsizes))
-        self.ValueUDLabel.grid(row=0, column=C_VALUEDOWN, padx=2, pady=2, columnspan=2)
+        def _on_mousewheel_main(event):
+            Bind.mouse_y_scroll(event, self.canvas, None)
+            _schedule_update()
 
-        self.UDLabel = tk.Label(self.main_frame, text="増減値", font=(gl.deffont, gl.fsizes))
-        self.UDLabel.grid(row=0, column=C_UDVALUE, padx=2, pady=2)
+        def _on_mousewheel_combo(event, combo_widget):
+            Bind.mouse_y_scroll(event, self.canvas, combo_widget)
+            _schedule_update()
 
-        self.InitLabel = tk.Label(self.main_frame, text="初期値", font=(gl.deffont, gl.fsizes))
-        self.InitLabel.grid(row=0, column=C_INIT, padx=2, pady=2)
+        def _build_row(i):
+            """行 i (1-based) のウィジェットを生成する。"""
+            if i in _rendered:
+                return
+            _rendered.add(i)
+            idx = i - 1  # 0-based
 
-        self.CommentLabel = tk.Label(self.main_frame, text="ｺﾒﾝﾄ", font=(gl.deffont, gl.fsizes))
-        self.CommentLabel.grid(row=0, column=C_COMMENT, padx=2, pady=2)
-
-        self.VarTypeLabel = tk.Label(self.main_frame, text="型", font=(gl.deffont, gl.fsizes))
-        self.VarTypeLabel.grid(row=0, column=C_VARTYPE, padx=2, pady=2)
-
-        self.AI0Label = tk.Label(self.main_frame, text="0%AI値", font=(gl.deffont, gl.fsizes))
-        self.AI0Label.grid(row=0, column=C_AI0, padx=2, pady=2)
-
-        self.AI100Label = tk.Label(self.main_frame, text="100%AI値", font=(gl.deffont, gl.fsizes))
-        self.AI100Label.grid(row=0, column=C_AI100, padx=2, pady=2)
-
-        self.User0Label = tk.Label(self.main_frame, text="0%ﾕｰｻﾞ値", font=(gl.deffont, gl.fsizes))
-        self.User0Label.grid(row=0, column=C_USER0, padx=2, pady=2)
-
-        self.User100Label = tk.Label(self.main_frame, text="100%ﾕｰｻﾞ値", font=(gl.deffont, gl.fsizes))
-        self.User100Label.grid(row=0, column=C_USER100, padx=2, pady=2)
-
-#-----------------------------------データ行 (row=1..ChMax)---------------
-
-        self.Nolabel = []
-        self.DeviceNoCombo = []
-        self.AddressText = []
-        self.ValueText = []
-        self.ValueUpButton = []
-        self.ValueDownButton = []
-        self.UDValueText = []
-        self.InitValueText = []
-        self.CommentText = []
-        self.VarTypecombo = []
-        self.AI0ValueText = []
-        self.AI100ValueText = []
-        self.User0ValueText = []
-        self.User100ValueText = []
-
-        for i in range(1, gl.ChMax+1):
-            r = i  # grid row（0=ヘッダー、1以降=データ）
+            self.main_frame.grid_rowconfigure(i, minsize=0)
 
             # ChNo
             lbl = tk.Label(self.main_frame, text=i, font=(gl.deffont, gl.fsizes))
-            lbl.grid(row=r, column=C_CHNO, padx=2)
-            self.Nolabel.append(lbl)
+            lbl.grid(row=i, column=C_CHNO, padx=2)
+            lbl.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            self.Nolabel[idx] = lbl
 
             # ﾃﾞﾊﾞｲｽNo
             combo = ttk.Combobox(self.main_frame, values=gl.EnableDevice, font=(gl.deffont, gl.fsizes), width=2)
-            combo.grid(row=r, column=C_DEVICENO, padx=2)
-            combo.bind('<FocusOut>', lambda event, arg1=combo, arg2=gl.EnableDevice: Bind.ComboChange(event, arg1, arg2))
-            self.DeviceNoCombo.append(combo)
+            combo.grid(row=i, column=C_DEVICENO, padx=2)
+            combo.bind('<FocusOut>',   lambda e, a=combo, b=gl.EnableDevice: Bind.ComboChange(e, a, b))
+            combo.bind('<MouseWheel>', lambda e, a=combo: _on_mousewheel_combo(e, a))
+            combo.insert(0, str(gl.IOConfDic[idx]['DeviceNo']))
+            self.DeviceNoCombo[idx] = combo
 
-            # 読書アドレス
+            # 読書ｱﾄﾞﾚｽ
             addr = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=12)
-            addr.grid(row=r, column=C_ADDRESS, padx=2)
-            self.AddressText.append(addr)
+            addr.grid(row=i, column=C_ADDRESS, padx=2)
+            addr.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            addr.insert(0, str(gl.IOConfDic[idx]['Address']))
+            self.AddressText[idx] = addr
 
-            # 現在値
-            gl.ValueText[i-1] = tk.StringVar()
-            val = tk.Entry(self.main_frame, textvariable=gl.ValueText[i-1], font=(gl.deffont, gl.fsizes), width=12)
-            val.grid(row=r, column=C_VALUE, padx=2)
-            val.bind('<FocusIn>', lambda event, arg1=i-1, arg2=gl.ValueTextFocus: Bind.ValueTextFocusIn(event, arg1, arg2))
-            val.bind('<FocusOut>', lambda event, arg1=i-1, arg2=gl.ValueTextFocus: Bind.ValueTextFocusOut(event, arg1, arg2))
-            val.bind('<KeyRelease>', lambda event, arg1=i-1, arg2=gl.ValueText: Bind.ValueTextEnter(event, arg1, arg2))
-            self.ValueText.append(val)
+            # 現在値（StringVar は gl.ValueText[idx] に生成済み）
+            val = tk.Entry(self.main_frame, textvariable=gl.ValueText[idx], font=(gl.deffont, gl.fsizes), width=12)
+            val.grid(row=i, column=C_VALUE, padx=2)
+            val.bind('<FocusIn>',    lambda e, a=idx, b=gl.ValueTextFocus: Bind.ValueTextFocusIn(e, a, b))
+            val.bind('<FocusOut>',   lambda e, a=idx, b=gl.ValueTextFocus: Bind.ValueTextFocusOut(e, a, b))
+            val.bind('<KeyRelease>', lambda e, a=idx, b=gl.ValueText:      Bind.ValueTextEnter(e, a, b))
+            val.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            self.ValueText[idx] = val
 
             # 値減少ボタン（▼）
-            down = tk.Button(self.main_frame, text='▼', font=(gl.deffont, gl.fsizes), command=partial(Bind.ValueDown, i-1))
-            down.grid(row=r, column=C_VALUEDOWN, padx=2)
-            down['state'] = 'disabled'
-            self.ValueDownButton.append(down)
+            down = tk.Button(self.main_frame, text='▼', font=(gl.deffont, gl.fsizes), command=partial(Bind.ValueDown, idx))
+            down.grid(row=i, column=C_VALUEDOWN, padx=2)
+            down['state'] = 'normal' if gl.IORWBusy else 'disabled'
+            down.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            self.ValueDownButton[idx] = down
 
             # 値増加ボタン（▲）
-            up = tk.Button(self.main_frame, text='▲', font=(gl.deffont, gl.fsizes), command=partial(Bind.ValueUp, i-1))
-            up.grid(row=r, column=C_VALUEUP, padx=2)
-            up['state'] = 'disabled'
-            self.ValueUpButton.append(up)
+            up = tk.Button(self.main_frame, text='▲', font=(gl.deffont, gl.fsizes), command=partial(Bind.ValueUp, idx))
+            up.grid(row=i, column=C_VALUEUP, padx=2)
+            up['state'] = 'normal' if gl.IORWBusy else 'disabled'
+            up.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            self.ValueUpButton[idx] = up
 
             # 増減値
             ud = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=7)
-            ud.grid(row=r, column=C_UDVALUE, padx=2)
-            ud.bind('<FocusOut>', lambda event, arg1=ud: Bind.TextFloatCheck(event, arg1))
-            self.UDValueText.append(ud)
+            ud.grid(row=i, column=C_UDVALUE, padx=2)
+            ud.bind('<FocusOut>',   lambda e, a=ud: Bind.TextFloatCheck(e, a))
+            ud.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            ud.insert(0, str(gl.IOConfDic[idx]['UpDown']))
+            self.UDValueText[idx] = ud
 
             # 初期値
             init = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=7)
-            init.grid(row=r, column=C_INIT, padx=2)
-            init.bind('<FocusOut>', lambda event, arg1=init: Bind.TextFloatCheck(event, arg1))
-            self.InitValueText.append(init)
+            init.grid(row=i, column=C_INIT, padx=2)
+            init.bind('<FocusOut>',   lambda e, a=init: Bind.TextFloatCheck(e, a))
+            init.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            init.insert(0, str(gl.IOConfDic[idx]['Init']))
+            self.InitValueText[idx] = init
 
             # ｺﾒﾝﾄ
             comment = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=26)
-            comment.grid(row=r, column=C_COMMENT, padx=2)
-            self.CommentText.append(comment)
+            comment.grid(row=i, column=C_COMMENT, padx=2)
+            comment.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            comment.insert(0, str(gl.IOConfDic[idx]['Comment']))
+            self.CommentText[idx] = comment
 
             # 型
             vtype = ttk.Combobox(self.main_frame, values=gl.VarTypeList, font=(gl.deffont, gl.fsizes), width=5)
-            vtype.grid(row=r, column=C_VARTYPE, padx=2)
-            vtype.bind('<FocusOut>', lambda event, arg1=vtype, arg2=gl.VarTypeList: Bind.ComboChange(event, arg1, arg2))
-            self.VarTypecombo.append(vtype)
+            vtype.grid(row=i, column=C_VARTYPE, padx=2)
+            vtype.bind('<FocusOut>',   lambda e, a=vtype, b=gl.VarTypeList: Bind.ComboChange(e, a, b))
+            vtype.bind('<MouseWheel>', lambda e, a=vtype: _on_mousewheel_combo(e, a))
+            vtype.insert(0, str(gl.IOConfDic[idx]['VarType']))
+            self.VarTypecombo[idx] = vtype
 
             # 0%AI値
             ai0 = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=7)
-            ai0.grid(row=r, column=C_AI0, padx=2)
-            ai0.bind('<FocusOut>', lambda event, arg1=ai0: Bind.TextFloatCheck(event, arg1))
-            self.AI0ValueText.append(ai0)
+            ai0.grid(row=i, column=C_AI0, padx=2)
+            ai0.bind('<FocusOut>',   lambda e, a=ai0: Bind.TextFloatCheck(e, a))
+            ai0.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            ai0.insert(0, str(gl.IOConfDic[idx]['AI0']))
+            self.AI0ValueText[idx] = ai0
 
             # 100%AI値
             ai100 = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=12)
-            ai100.grid(row=r, column=C_AI100, padx=2)
-            ai100.bind('<FocusOut>', lambda event, arg1=ai100: Bind.TextFloatCheck(event, arg1))
-            self.AI100ValueText.append(ai100)
+            ai100.grid(row=i, column=C_AI100, padx=2)
+            ai100.bind('<FocusOut>',   lambda e, a=ai100: Bind.TextFloatCheck(e, a))
+            ai100.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            ai100.insert(0, str(gl.IOConfDic[idx]['AI100']))
+            self.AI100ValueText[idx] = ai100
 
             # 0%User値
             user0 = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=7)
-            user0.grid(row=r, column=C_USER0, padx=2)
-            user0.bind('<FocusOut>', lambda event, arg1=user0: Bind.TextFloatCheck(event, arg1))
-            self.User0ValueText.append(user0)
+            user0.grid(row=i, column=C_USER0, padx=2)
+            user0.bind('<FocusOut>',   lambda e, a=user0: Bind.TextFloatCheck(e, a))
+            user0.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            user0.insert(0, str(gl.IOConfDic[idx]['User0']))
+            self.User0ValueText[idx] = user0
 
             # 100%User値
             user100 = tk.Entry(self.main_frame, font=(gl.deffont, gl.fsizes), width=12)
-            user100.grid(row=r, column=C_USER100, padx=2)
-            user100.bind('<FocusOut>', lambda event, arg1=user100: Bind.TextFloatCheck(event, arg1))
-            self.User100ValueText.append(user100)
+            user100.grid(row=i, column=C_USER100, padx=2)
+            user100.bind('<FocusOut>',   lambda e, a=user100: Bind.TextFloatCheck(e, a))
+            user100.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+            user100.insert(0, str(gl.IOConfDic[idx]['User100']))
+            self.User100ValueText[idx] = user100
 
-        #フレーム内全ウィジェットにマウスホイール関数ｾｯﾄ
-        mainframechild = self.main_frame.winfo_children()
-        for child in mainframechild:
-            child.bind("<MouseWheel>", lambda event, arg1=self.canvas, arg2=child: Bind.mouse_y_scroll(event, arg1, arg2))  # マウスホイール関数をｾｯﾄ
+            # IO_R/W実行中なら設定系を disabled、▲▼を normal に
+            if gl.IORWBusy:
+                combo['state'] = 'disabled'
+                addr['state']  = 'disabled'
+                vtype['state'] = 'disabled'
 
-        #各ウィジェットに文字反映
-        for i in range(gl.ChMax):
-            self.DeviceNoCombo[i].insert(0, str(gl.IOConfDic[i]['DeviceNo']))
-            self.AddressText[i].insert(0, str(gl.IOConfDic[i]['Address']))
-            self.InitValueText[i].insert(0, str(gl.IOConfDic[i]['Init']))
-            self.UDValueText[i].insert(0, str(gl.IOConfDic[i]['UpDown']))
-            self.CommentText[i].insert(0, str(gl.IOConfDic[i]['Comment']))
-            self.VarTypecombo[i].insert(0, str(gl.IOConfDic[i]['VarType']))
-            self.AI0ValueText[i].insert(0, str(gl.IOConfDic[i]['AI0']))
-            self.AI100ValueText[i].insert(0, str(gl.IOConfDic[i]['AI100']))
-            self.User0ValueText[i].insert(0, str(gl.IOConfDic[i]['User0']))
-            self.User100ValueText[i].insert(0, str(gl.IOConfDic[i]['User100']))
-            cv = gl.IOConfDic[i].get('CurrentVal', '') if isinstance(gl.IOConfDic[i], dict) else ''
-            if cv:
-                gl.ValueText[i].set(cv)
+        # ---- 表示中の行番号を計算 ----
+        def _get_visible_range():
+            h = self.canvas.winfo_height()
+            if h <= 1:
+                return 1, 20
+            y0 = self.canvas.canvasy(0)
+            y1 = self.canvas.canvasy(h)
+            rh = max(1, _row_h[0])
+            first = max(1, int(y0 / rh))
+            last  = min(gl.ChMax, int(y1 / rh) + 1)
+            return first, last
+
+        # ---- スクロール後に必要な行を生成 ----
+        def _update_visible_rows():
+            first, last = _get_visible_range()
+            first_buf = max(1, first - _BUFFER)
+            last_buf  = min(gl.ChMax, last + _BUFFER)
+            new_rows = False
+            for i in range(first_buf, last_buf + 1):
+                if i not in _rendered:
+                    _build_row(i)
+                    new_rows = True
+            if new_rows:
+                self.canvas.config(scrollregion=self.canvas.bbox('all'))
+
+        # ---- スクロールバーコマンド（行生成を伴う） ----
+        def _do_yview(*args):
+            self.canvas.yview(*args)
+            _schedule_update()
+
+        self.ybar.config(command=_do_yview)
+        self.main_frame.bind('<MouseWheel>', lambda e: _on_mousewheel_main(e))
+        self.canvas.bind('<MouseWheel>',     lambda e: _on_mousewheel_main(e))
+
+        # ---- インポート後に描画済み行を gl.IOConfDic で再反映するメソッド ----
+        def _refresh_rendered_rows():
+            for _ri in sorted(_rendered):
+                _idx = _ri - 1
+                self.DeviceNoCombo[_idx].set('')
+                self.DeviceNoCombo[_idx].insert(0, str(gl.IOConfDic[_idx]['DeviceNo']))
+                self.AddressText[_idx].delete(0, tk.END)
+                self.AddressText[_idx].insert(0, str(gl.IOConfDic[_idx]['Address']))
+                self.InitValueText[_idx].delete(0, tk.END)
+                self.InitValueText[_idx].insert(0, str(gl.IOConfDic[_idx]['Init']))
+                self.UDValueText[_idx].delete(0, tk.END)
+                self.UDValueText[_idx].insert(0, str(gl.IOConfDic[_idx]['UpDown']))
+                self.CommentText[_idx].delete(0, tk.END)
+                self.CommentText[_idx].insert(0, str(gl.IOConfDic[_idx]['Comment']))
+                self.VarTypecombo[_idx].set('')
+                self.VarTypecombo[_idx].insert(0, str(gl.IOConfDic[_idx]['VarType']))
+                self.AI0ValueText[_idx].delete(0, tk.END)
+                self.AI0ValueText[_idx].insert(0, str(gl.IOConfDic[_idx]['AI0']))
+                self.AI100ValueText[_idx].delete(0, tk.END)
+                self.AI100ValueText[_idx].insert(0, str(gl.IOConfDic[_idx]['AI100']))
+                self.User0ValueText[_idx].delete(0, tk.END)
+                self.User0ValueText[_idx].insert(0, str(gl.IOConfDic[_idx]['User0']))
+                self.User100ValueText[_idx].delete(0, tk.END)
+                self.User100ValueText[_idx].insert(0, str(gl.IOConfDic[_idx]['User100']))
+                _cv = gl.IOConfDic[_idx].get('CurrentVal', '')
+                gl.ValueText[_idx].set(_cv if _cv else '')
+
+        self.refresh_rendered_rows = _refresh_rendered_rows
+
+        # ---- 初期描画: 最初の FIRST_ROWS 行のみ生成 ----
+        FIRST_ROWS = 20
+        for _fi in range(1, min(FIRST_ROWS, gl.ChMax) + 1):
+            _build_row(_fi)
 
 #--------------------------------------------------------------------------
 
@@ -342,8 +410,7 @@ class App(tk.Tk):
 
         self.update_idletasks()  # レイアウト計算（非表示のまま）
 
-        # 各列幅を max(ヘッダーラベル幅, データウィジェット幅) に揃える
-        # 小さい方はセル内に自動で余白を持つ形となる
+        # 各列幅を max(ヘッダーラベル幅, データウィジェット幅) に揃える（FIRST_ROWS 行で計測）
         for _col in range(14):
             _hb = _hf.grid_bbox(column=_col, row=0)
             _db = self.main_frame.grid_bbox(column=_col, row=1)
@@ -352,9 +419,14 @@ class App(tk.Tk):
                 _hf.grid_columnconfigure(_col, minsize=_cw)
                 self.main_frame.grid_columnconfigure(_col, minsize=_cw)
 
-        # main_frame の元ヘッダーラベルを非表示化して row=0 を折りたたむ
-        for _hw in self.main_frame.grid_slaves(row=0):
-            _hw.grid_remove()
+        # 実測行高さ → 未描画行のプレースホルダーに使用
+        _total_h = self.main_frame.winfo_reqheight()
+        _row_h[0] = max(1, _total_h // FIRST_ROWS)
+
+        # 未描画行のスクロール高さをプレースホルダーで確保
+        for _pi in range(FIRST_ROWS + 1, gl.ChMax + 1):
+            self.main_frame.grid_rowconfigure(_pi, minsize=_row_h[0])
+
         self.main_frame.grid_rowconfigure(0, minsize=0)
         self.canvas.config(scrollregion=self.canvas.bbox('all'))
 
