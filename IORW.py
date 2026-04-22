@@ -96,7 +96,7 @@ def IORW():
         DB.BackUp()
         
         #フォーム無効化処理
-        gl.app.RWStartButton['text']='IO読書停止'
+        gl.app.RWStartButton['text']='IO_R/W停止'
         gl.app.changePageButton['state']='disabled'
         gl.app.SensorConfButton['state']='disabled'
         gl.app.IOClearConfButton['state']='disabled'
@@ -129,7 +129,7 @@ def IORW():
     else :
         gl.IORWBusy = False
         gl.TraceFlag = False
-        gl.app.RWStartButton['text']='IO読書開始'
+        gl.app.RWStartButton['text']='IO_R/W開始'
         gl.app.TraceButton['text']='ﾄﾚｰｽ開始'
         gl.app.changePageButton['state']='normal'
         gl.app.SensorConfButton['state']='normal'

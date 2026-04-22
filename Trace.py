@@ -8,7 +8,7 @@ import TCPGlobalVar as gl
 
 def TracePush():
     if not gl.IORWBusy :
-        messagebox.showinfo('エラー','IO読書を実施してください。')
+        messagebox.showinfo('エラー','IO_R/Wを実施してください。')
         return
     if not gl.TraceFlag :
         gl.app.TraceButton['text']='ﾄﾚｰｽ停止'

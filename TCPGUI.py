@@ -24,14 +24,15 @@ class App(tk.Tk):
         self.withdraw()
 
         # ウィンドウタイトルを決定
-        self.title("IO読書")
+        self.title("ｿｹｯﾄ君")
 
         # ウィンドウの大きさを決定（起動時はフル幅で全ボタン・テキストボックスを表示）
         self.geometry(str(gl.winmaxwidth)+"x"+str(gl.winheight))
 
-        # ツールバー行(row=0)は固定、キャンバス行(row=1)を伸縮
+        # ツールバー行(row=0)は固定、固定ヘッダー行(row=1)は固定、キャンバス行(row=2)を伸縮
         self.grid_rowconfigure(0, weight=0)
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(1, weight=0)  # 固定ヘッダー行
+        self.grid_rowconfigure(2, weight=1)  # キャンバス行
         self.grid_columnconfigure(0, weight=1)
 
 #-----------------------------------toolbar_frame--------------------------
@@ -43,8 +44,8 @@ class App(tk.Tk):
 
         tc = 0  # ツールバー列カウンタ
 
-        # IO読書開始ボタン
-        self.RWStartButton = tk.Button(toolbar_frame, text="IO読書開始", command=lambda: IORW.IORW())
+        # IOモニタ開始ボタン
+        self.RWStartButton = tk.Button(toolbar_frame, text="IO_R/W開始", command=lambda: IORW.IORW())
         self.RWStartButton.grid(row=0, column=tc, padx=2, pady=2)
         tc += 1
         ### ｽｷｬﾝﾀｲﾑデバイスラベル作成
@@ -58,11 +59,11 @@ class App(tk.Tk):
         self.Periodcombo.set(1)
         tc += 1
         ### ｽｷｬﾝﾀｲﾑラベル作成
-        ScanTimelabel = tk.Label(toolbar_frame, text='ｽｷｬﾝﾀｲﾑ', font=(gl.deffont, gl.fsizes))
+        ScanTimelabel = tk.Label(toolbar_frame, text='R/Wｽｷｬﾝﾀｲﾑ', font=(gl.deffont, gl.fsizes))
         ScanTimelabel.grid(row=0, column=tc, padx=2)
         tc += 1
         ### ｽｷｬﾝﾀｲﾑ作成
-        self.ScanTime = tk.Label(toolbar_frame, text=0, font=(gl.deffont, gl.fsizes), width=5, anchor='e')
+        self.ScanTime = tk.Label(toolbar_frame, text=0, font=(gl.deffont, gl.fsizes), width=4, anchor='e')
         self.ScanTime.grid(row=0, column=tc, padx=2)
         tc += 1
         ### ｽｷｬﾝﾀｲﾑ単位作成
@@ -78,7 +79,7 @@ class App(tk.Tk):
         TraceScanTimelabel.grid(row=0, column=tc, padx=2)
         tc += 1
         ###ﾄﾚｰｽｽｷｬﾝﾀｲﾑコンボボックス
-        self.Tracecombo = ttk.Combobox(toolbar_frame, values=gl.TraceTime, font=(gl.deffont, gl.fsizes), width=7)
+        self.Tracecombo = ttk.Combobox(toolbar_frame, values=gl.TraceTime, font=(gl.deffont, gl.fsizes), width=11)
         self.Tracecombo.grid(row=0, column=tc, padx=2)
         self.Tracecombo.bind('<FocusOut>', lambda event, arg1=self.Tracecombo, arg2=gl.TraceTime: Bind.ComboChange(event, arg1, arg2))
         self.Tracecombo.set(gl.TraceTime[0])
@@ -108,14 +109,18 @@ class App(tk.Tk):
         self.InportButton = tk.Button(self.right_toolbar, text="ｲﾝﾎﾟｰﾄ", command=lambda: InExeport.Inport())
         self.InportButton.pack(side='left', padx=2, pady=2)
 
-#-----------------------------------canvas / main_frame--------------------
+#-----------------------------------固定ヘッダー / canvas / main_frame--------------------
+
+        # 固定ヘッダーフレーム（row=1 / スクロールしない）
+        self.io_header_frame = tk.Frame(self)
+        self.io_header_frame.grid(row=1, column=0, sticky="ew")
 
         # スクロールバー設置
         self.canvas = tk.Canvas(self, width=gl.winwidth, height=gl.winheight, highlightthickness=0)
-        self.canvas.grid(row=1, column=0, sticky="nsew")
+        self.canvas.grid(row=2, column=0, sticky="nsew")
 
         self.ybar = tk.Scrollbar(self, orient=tk.VERTICAL)  # 縦スクロールバー配置
-        self.ybar.grid(row=1, column=1, sticky=tk.N+tk.S)
+        self.ybar.grid(row=2, column=1, sticky=tk.N+tk.S)
         self.ybar.config(command=self.canvas.yview)  # 縦スクロール用ｺﾏﾝﾄﾞ
         self.canvas.config(yscrollcommand=self.ybar.set)  # キャンバスにスクロールバーの動きを反映
         self.canvas.yview_moveto(0)  # キャンバスのスクロールを初期化
@@ -318,7 +323,41 @@ class App(tk.Tk):
         # スクロール範囲を確定し、以降の変更に追従するよう<Configure>をバインド
         self.main_frame.bind("<Configure>", lambda e: self.canvas.config(scrollregion=self.canvas.bbox('all')))
 
-        # 全ウィジェット構築完了後に表示
+        # io_header_frame にヘッダーラベルを grid で配置（update_idletasks 前に構築して幅計測可能にする）
+        _hf = self.io_header_frame
+        _hfont = (gl.deffont, gl.fsizes)
+        tk.Label(_hf, text="ChNo",       font=_hfont).grid(row=0, column=0,  padx=2, pady=2)
+        tk.Label(_hf, text="ﾃﾞﾊﾞｲｽNo",   font=_hfont).grid(row=0, column=1,  padx=2, pady=2)
+        tk.Label(_hf, text="読書ｱﾄﾞﾚｽ",   font=_hfont).grid(row=0, column=2,  padx=2, pady=2)
+        tk.Label(_hf, text="現在値",       font=_hfont).grid(row=0, column=3,  padx=2, pady=2)
+        tk.Label(_hf, text="増減ﾎﾞﾀﾝ",   font=_hfont).grid(row=0, column=4,  padx=2, pady=2, columnspan=2)
+        tk.Label(_hf, text="増減値",       font=_hfont).grid(row=0, column=6,  padx=2, pady=2)
+        tk.Label(_hf, text="初期値",       font=_hfont).grid(row=0, column=7,  padx=2, pady=2)
+        tk.Label(_hf, text="ｺﾒﾝﾄ",        font=_hfont).grid(row=0, column=8,  padx=2, pady=2)
+        tk.Label(_hf, text="型",           font=_hfont).grid(row=0, column=9,  padx=2, pady=2)
+        tk.Label(_hf, text="0%AI値",      font=_hfont).grid(row=0, column=10, padx=2, pady=2)
+        tk.Label(_hf, text="100%AI値",    font=_hfont).grid(row=0, column=11, padx=2, pady=2)
+        tk.Label(_hf, text="0%ﾕｰｻﾞ値",   font=_hfont).grid(row=0, column=12, padx=2, pady=2)
+        tk.Label(_hf, text="100%ﾕｰｻﾞ値", font=_hfont).grid(row=0, column=13, padx=2, pady=2)
+
+        self.update_idletasks()  # レイアウト計算（非表示のまま）
+
+        # 各列幅を max(ヘッダーラベル幅, データウィジェット幅) に揃える
+        # 小さい方はセル内に自動で余白を持つ形となる
+        for _col in range(14):
+            _hb = _hf.grid_bbox(column=_col, row=0)
+            _db = self.main_frame.grid_bbox(column=_col, row=1)
+            _cw = max(_hb[2] if _hb else 0, _db[2] if _db else 0)
+            if _cw > 0:
+                _hf.grid_columnconfigure(_col, minsize=_cw)
+                self.main_frame.grid_columnconfigure(_col, minsize=_cw)
+
+        # main_frame の元ヘッダーラベルを非表示化して row=0 を折りたたむ
+        for _hw in self.main_frame.grid_slaves(row=0):
+            _hw.grid_remove()
+        self.main_frame.grid_rowconfigure(0, minsize=0)
+        self.canvas.config(scrollregion=self.canvas.bbox('all'))
+
         self.deiconify()
         self.update_idletasks()
         self._adjust_layout()

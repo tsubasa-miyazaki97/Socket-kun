@@ -27,7 +27,7 @@ DeviceList=["PC10G","MP","OMRON[CJ]","ﾀﾞﾐｰ(接続先無)","OPCUA"]
 SensorList=['ｴｯｼﾞｾﾝｻ','ﾀﾞﾝｻｰ','径演算ﾀﾞﾝｻｰ','張力計','径演算張力計','径ｾﾝｻ','ｲｺｰﾙ(=)','Bit演算出力']
 VarTypeList = ['Short','UShort','Long','ULong','Float']#,'Float(16bit)']
 MyPath = os.path.dirname(os.path.abspath(__file__))
-TraceTime = ['IO読書ｽｷｬﾝﾀｲﾑ','20','50','100']
+TraceTime = ['R/Wｽｷｬﾝﾀｲﾑ','20','50','100']
 
 Key = ['Device','IPAddress','Port','DeviceNo','Address','Init','UpDown','Comment','VarType','AI0','AI100','User0','User100',\
     'Sensor','In1','In2','Out1','Out2','Out1Inv','Out2Inv','DigitsCoef','CalcCoef','Ratio','TimeLag','Disable','CurrentVal']

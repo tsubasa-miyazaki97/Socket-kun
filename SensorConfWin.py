@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 import inspect
+import time
 import WidgetBind as Bind
 import TCPGlobalVar as gl
 
@@ -17,42 +18,41 @@ def SensorConf() :
 
 
     if gl.SensorConfWin ==  None or not gl.SensorConfWin.winfo_exists()  :
+        _t_start = time.perf_counter()
+
         gl.SensorConfWin = tk.Toplevel()
-        # ウィジェット構築中は非表示にして描画コストを削減
         gl.SensorConfWin.withdraw()
         gl.SensorConfWin.geometry(str(winwidth)+"x"+str(winheight))
         gl.SensorConfWin.title("センサー設定")
         gl.SensorConfWin.grid_rowconfigure(0, weight=0)
-        gl.SensorConfWin.grid_rowconfigure(1, weight=1)
+        gl.SensorConfWin.grid_rowconfigure(1, weight=0)  # 固定ヘッダー行
+        gl.SensorConfWin.grid_rowconfigure(2, weight=1)  # キャンバス行
         gl.SensorConfWin.grid_columnconfigure(0, weight=1)
 
         # ツールバーフレーム
         toolbar_frame = tk.Frame(gl.SensorConfWin)
         toolbar_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
-        # 設定クリアボタン
         gl.app.ConfClearbutton = tk.Button(toolbar_frame, text="設定クリア", command=lambda : ConfClear())
         gl.app.ConfClearbutton.grid(row=0, column=0, padx=2, pady=2)
-#-----------------------------------------
 
-        gl.app.Sensormainm_frame = tk.Frame(gl.SensorConfWin)#切替用ﾌﾚｰﾑ
-        gl.app.Sensormainm_frame.grid(row=1, column=0, sticky="nsew")
+        # 固定ヘッダーフレーム（スクロールしない / row=1）
+        sensor_header_frame = tk.Frame(gl.SensorConfWin, relief='flat')
+        sensor_header_frame.grid(row=1, column=0, sticky="ew")
+
+        gl.app.Sensormainm_frame = tk.Frame(gl.SensorConfWin)
+        gl.app.Sensormainm_frame.grid(row=2, column=0, sticky="nsew")
         gl.app.Sensormainm_frame.grid_rowconfigure(0, weight=1)
         gl.app.Sensormainm_frame.grid_columnconfigure(0, weight=1)
-        #スクロールバー設置
-        gl.app.Sensorcanvas = tk.Canvas(gl.app.Sensormainm_frame, highlightthickness=0)#スクロールバー置けるウィジェット(キャンバス)配置
 
-        gl.app.SensorFrame = tk.Frame(gl.app.Sensorcanvas, highlightthickness=0)#キャンバス上にﾌﾚｰﾑ設置
+        gl.app.Sensorcanvas = tk.Canvas(gl.app.Sensormainm_frame, highlightthickness=0)
+        gl.app.SensorFrame  = tk.Frame(gl.app.Sensorcanvas, highlightthickness=0)
         gl.app.Sensorcanvas.grid(row=0, column=0, sticky="nsew")
-        gl.app.Sensorcanvas.create_window(0,0,window=gl.app.SensorFrame,anchor="nw")#キャンバスにフレーム設置
-        gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all'))#フレームにフィットするようにキャンバスのスクロール可能範囲を変更
+        gl.app.Sensorcanvas.create_window(0, 0, window=gl.app.SensorFrame, anchor="nw")
 
-        gl.app.Sensorybar = tk.Scrollbar(gl.SensorConfWin,orient=tk.VERTICAL)#縦スクロールバー配置
-        gl.app.Sensorybar.grid(row=1,column=1,sticky=tk.N+tk.S)
-        gl.app.Sensorybar.config(command=gl.app.Sensorcanvas.yview)#縦スクロール用ｺﾏﾝﾄﾞ
-        gl.app.Sensorcanvas.config(yscrollcommand=gl.app.Sensorybar.set)#キャンバスにスクロールバーの動きを反映
-        gl.app.Sensorcanvas.yview_moveto(0)#キャンバスのスクロールを初期化
-        gl.app.SensorFrame.bind("<MouseWheel>",lambda event,arg1=gl.app.Sensorcanvas,arg2=gl.app.SensorFrame: Bind.mouse_y_scroll(event,arg1,arg2))#マウスホイール関数をﾌﾚｰﾑにｾｯﾄ
-        gl.app.Sensorcanvas.bind("<MouseWheel>",lambda event: Bind.mouse_y_scroll(event,gl.app.Sensorcanvas,None))#キャンバス空白部分のマウスホイール対応
+        gl.app.Sensorybar = tk.Scrollbar(gl.SensorConfWin, orient=tk.VERTICAL)
+        gl.app.Sensorybar.grid(row=2, column=1, sticky=tk.N+tk.S)
+        gl.app.Sensorcanvas.config(yscrollcommand=gl.app.Sensorybar.set)
+        gl.app.Sensorcanvas.yview_moveto(0)
 
         # 列定数
         C_NO      = 0
@@ -69,180 +69,268 @@ def SensorConf() :
         C_PARA4   = 11
         C_DISABLE = 12
 
-        # ヘッダー行 (row=0)
-        tk.Label(gl.app.SensorFrame, text="No",     font=(deffont, fsizes)).grid(row=0, column=C_NO,      padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="ｾﾝｻ種",  font=(deffont, fsizes)).grid(row=0, column=C_SENSOR,  padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="Ch1",    font=(deffont, fsizes)).grid(row=0, column=C_IN1,     padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="Ch2",    font=(deffont, fsizes)).grid(row=0, column=C_IN2,     padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="Ch3",    font=(deffont, fsizes)).grid(row=0, column=C_OUT1,    padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="Ch4",    font=(deffont, fsizes)).grid(row=0, column=C_OUT2,    padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="出力1\n反転", font=(deffont, fsizes)).grid(row=0, column=C_OUT1INV, padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="出力2\n反転", font=(deffont, fsizes)).grid(row=0, column=C_OUT2INV, padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="ﾊﾟﾗ1",   font=(deffont, fsizes)).grid(row=0, column=C_PARA1,   padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="ﾊﾟﾗ2",   font=(deffont, fsizes)).grid(row=0, column=C_PARA2,   padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="ﾊﾟﾗ3",   font=(deffont, fsizes)).grid(row=0, column=C_PARA3,   padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="ﾊﾟﾗ4",   font=(deffont, fsizes)).grid(row=0, column=C_PARA4,   padx=2, pady=2)
-        tk.Label(gl.app.SensorFrame, text="無効",    font=(deffont, fsizes)).grid(row=0, column=C_DISABLE, padx=2, pady=2)
+        # 固定ヘッダーラベル (sensor_header_frame に配置 / スクロールしない)
+        # カラム幅は update_idletasks() 後にデータフレームの実測値に合わせて同期する
+        tk.Label(sensor_header_frame, text="No",         font=(deffont, fsizes), anchor='center').grid(row=0, column=C_NO,      padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="ｾﾝｻ種",      font=(deffont, fsizes), anchor='center').grid(row=0, column=C_SENSOR,  padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="Ch1",        font=(deffont, fsizes), anchor='center').grid(row=0, column=C_IN1,     padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="Ch2",        font=(deffont, fsizes), anchor='center').grid(row=0, column=C_IN2,     padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="Ch3",        font=(deffont, fsizes), anchor='center').grid(row=0, column=C_OUT1,    padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="Ch4",        font=(deffont, fsizes), anchor='center').grid(row=0, column=C_OUT2,    padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="出力1\n反転", font=(deffont, fsizes), anchor='center').grid(row=0, column=C_OUT1INV, padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="出力2\n反転", font=(deffont, fsizes), anchor='center').grid(row=0, column=C_OUT2INV, padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="ﾊﾟﾗ1",       font=(deffont, fsizes), anchor='center').grid(row=0, column=C_PARA1,   padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="ﾊﾟﾗ2",       font=(deffont, fsizes), anchor='center').grid(row=0, column=C_PARA2,   padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="ﾊﾟﾗ3",       font=(deffont, fsizes), anchor='center').grid(row=0, column=C_PARA3,   padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="ﾊﾟﾗ4",       font=(deffont, fsizes), anchor='center').grid(row=0, column=C_PARA4,   padx=2, pady=2, sticky='ew')
+        tk.Label(sensor_header_frame, text="無効",        font=(deffont, fsizes), anchor='center').grid(row=0, column=C_DISABLE, padx=2, pady=2, sticky='ew')
 
-        # ヘッダー構築完了後に早期表示・グラブ（行生成前に画面を出す）
+        # ウィジェットリストを None で初期化（バーチャルスクロール対応）
+        # 未描画行は None のまま。描画済み行のみ実際のウィジェットが入る。
+        gl.app.SensorNolabel  = [None] * gl.ChMax
+        gl.app.SensorCombo    = [None] * gl.ChMax
+        gl.app.In1Combo       = [None] * gl.ChMax
+        gl.app.In2Combo       = [None] * gl.ChMax
+        gl.app.Out1Combo      = [None] * gl.ChMax
+        gl.app.Out2Combo      = [None] * gl.ChMax
+        gl.app.Out1InvCheck   = [None] * gl.ChMax
+        gl.app.Out1InvVal     = [None] * gl.ChMax
+        gl.app.Out2InvCheck   = [None] * gl.ChMax
+        gl.app.Out2InvVal     = [None] * gl.ChMax
+        gl.app.DigitsCoefText = [None] * gl.ChMax
+        gl.app.CalcCoefText   = [None] * gl.ChMax
+        gl.app.RatioText      = [None] * gl.ChMax
+        gl.app.TimeLagText    = [None] * gl.ChMax
+        gl.app.DisableCheck   = [None] * gl.ChMax
+        gl.app.DisableVal     = [None] * gl.ChMax
+
+        # ---- バーチャルスクロール状態 ----
+        # 表示中の行のみウィジェットを生成し、未表示行は grid_rowconfigure(minsize)
+        # でスクロール高さだけ確保する。2600 ウィジェット一括生成を回避。
+        _rendered = set()  # ウィジェットが存在する行番号 (1-based)
+        _row_h    = [32]   # 実測行高さ [px]（update_idletasks 後に更新）
+        _BUFFER   = 3      # 上下バッファ行数
+        canvas    = gl.app.Sensorcanvas
+
+        # ---- スクロールデバウンス ----
+        # スクロールバーを素早く動かした場合、ウィジェット生成を 150ms 遅延させて
+        # 連続発火による固まりを防ぐ。キャンバスの視覚スクロール自体は即時実行。
+        _scroll_after_id = [None]
+
+        def _schedule_update():
+            if _scroll_after_id[0] is not None:
+                gl.SensorConfWin.after_cancel(_scroll_after_id[0])
+            _scroll_after_id[0] = gl.SensorConfWin.after(150, _update_visible_rows)
+
+        # ---- マウスホイール ----
+        def _on_mousewheel(event):
+            Bind.mouse_y_scroll(event, canvas, None)
+            _schedule_update()
+
+        def _on_mousewheel_combo(event, combo_widget):
+            Bind.mouse_y_scroll(event, canvas, combo_widget)
+            _schedule_update()
+
+        # ---- 1行分のウィジェット生成 ----
+        def _build_row(i):
+            """行 i (1-based) のウィジェットをグリッドに生成する。"""
+            if i in _rendered:
+                return
+            _rendered.add(i)
+            idx = i - 1
+
+            # minsize プレースホルダーを解除してウィジェットで高さを決める
+            gl.app.SensorFrame.grid_rowconfigure(i, minsize=0)
+
+            lbl = tk.Label(gl.app.SensorFrame, text=i, font=(deffont, fsizes))
+            lbl.grid(row=i, column=C_NO, padx=2)
+            lbl.bind("<MouseWheel>", lambda e: _on_mousewheel(e))
+            lbl.bind("<FocusIn>",    lambda e: Bind.TipDel(e))
+            gl.app.SensorNolabel[idx] = lbl
+
+            combo = ttk.Combobox(gl.app.SensorFrame, values=gl.SensorList, font=(deffont, fsizes), width=8)
+            combo.grid(row=i, column=C_SENSOR, padx=2)
+            combo.bind('<FocusOut>',          lambda e, a=combo, b=gl.SensorList, c=idx: (Bind.ComboChange(e, a, b), SensorSelect(e, b, c)))
+            combo.bind("<<ComboboxSelected>>", lambda e, a=gl.SensorList, b=idx: SensorSelect(e, a, b))
+            combo.bind("<MouseWheel>",        lambda e, a=combo: _on_mousewheel_combo(e, a))
+            combo.bind("<FocusIn>",           lambda e: Bind.TipDel(e))
+            gl.app.SensorCombo[idx] = combo
+
+            in1 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
+            in1.grid(row=i, column=C_IN1, padx=2)
+            in1.bind('<FocusOut>',  lambda e, a=in1, b=gl.EnableCh: Bind.ComboChange(e, a, b))
+            in1.bind("<MouseWheel>", lambda e, a=in1: _on_mousewheel_combo(e, a))
+            in1.bind("<FocusIn>",   lambda e: Bind.TipDel(e))
+            gl.app.In1Combo[idx] = in1
+
+            in2 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
+            in2.grid(row=i, column=C_IN2, padx=2)
+            in2.bind('<FocusOut>',  lambda e, a=in2, b=gl.EnableCh: Bind.ComboChange(e, a, b))
+            in2.bind("<MouseWheel>", lambda e, a=in2: _on_mousewheel_combo(e, a))
+            in2.bind("<FocusIn>",   lambda e: Bind.TipDel(e))
+            gl.app.In2Combo[idx] = in2
+
+            out1 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
+            out1.grid(row=i, column=C_OUT1, padx=2)
+            out1.bind('<FocusOut>',  lambda e, a=out1, b=gl.EnableCh: Bind.ComboChange(e, a, b))
+            out1.bind("<MouseWheel>", lambda e, a=out1: _on_mousewheel_combo(e, a))
+            out1.bind("<FocusIn>",   lambda e: Bind.TipDel(e))
+            gl.app.Out1Combo[idx] = out1
+
+            out2 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
+            out2.grid(row=i, column=C_OUT2, padx=2)
+            out2.bind('<FocusOut>',  lambda e, a=out2, b=gl.EnableCh: Bind.ComboChange(e, a, b))
+            out2.bind("<MouseWheel>", lambda e, a=out2: _on_mousewheel_combo(e, a))
+            out2.bind("<FocusIn>",   lambda e: Bind.TipDel(e))
+            gl.app.Out2Combo[idx] = out2
+
+            out1inv_val   = tk.BooleanVar()
+            out1inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out1inv_val)
+            out1inv_check.grid(row=i, column=C_OUT1INV, padx=2)
+            out1inv_check.bind("<MouseWheel>", lambda e: _on_mousewheel(e))
+            out1inv_check.bind("<FocusIn>",    lambda e: Bind.TipDel(e))
+            gl.app.Out1InvVal[idx]   = out1inv_val
+            gl.app.Out1InvCheck[idx] = out1inv_check
+
+            out2inv_val   = tk.BooleanVar()
+            out2inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out2inv_val)
+            out2inv_check.grid(row=i, column=C_OUT2INV, padx=2)
+            out2inv_check.bind("<MouseWheel>", lambda e: _on_mousewheel(e))
+            out2inv_check.bind("<FocusIn>",    lambda e: Bind.TipDel(e))
+            gl.app.Out2InvVal[idx]   = out2inv_val
+            gl.app.Out2InvCheck[idx] = out2inv_check
+
+            para1 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
+            para1.grid(row=i, column=C_PARA1, padx=2)
+            para1.bind('<FocusOut>',  lambda e, a=para1: Bind.TextFloatCheck(e, a))
+            para1.bind("<MouseWheel>", lambda e: _on_mousewheel(e))
+            para1.bind("<FocusIn>",   lambda e: Bind.TipDel(e))
+            gl.app.DigitsCoefText[idx] = para1
+
+            para2 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
+            para2.grid(row=i, column=C_PARA2, padx=2)
+            para2.bind('<FocusOut>',  lambda e, a=para2: Bind.TextFloatCheck(e, a))
+            para2.bind("<MouseWheel>", lambda e: _on_mousewheel(e))
+            para2.bind("<FocusIn>",   lambda e: Bind.TipDel(e))
+            gl.app.CalcCoefText[idx] = para2
+
+            para3 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
+            para3.grid(row=i, column=C_PARA3, padx=2)
+            para3.bind('<FocusOut>',  lambda e, a=para3: Bind.TextFloatCheck(e, a))
+            para3.bind("<MouseWheel>", lambda e: _on_mousewheel(e))
+            para3.bind("<FocusIn>",   lambda e: Bind.TipDel(e))
+            gl.app.RatioText[idx] = para3
+
+            para4 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
+            para4.grid(row=i, column=C_PARA4, padx=2)
+            para4.bind('<FocusOut>',  lambda e, a=para4: Bind.TextFloatCheck(e, a))
+            para4.bind("<MouseWheel>", lambda e: _on_mousewheel(e))
+            para4.bind("<FocusIn>",   lambda e: Bind.TipDel(e))
+            gl.app.TimeLagText[idx] = para4
+
+            disable_val   = tk.BooleanVar()
+            disable_check = ttk.Checkbutton(gl.app.SensorFrame, variable=disable_val)
+            disable_check.grid(row=i, column=C_DISABLE, padx=2)
+            disable_check.bind("<MouseWheel>", lambda e: _on_mousewheel(e))
+            disable_check.bind("<FocusIn>",    lambda e: Bind.TipDel(e))
+            gl.app.DisableVal[idx]   = disable_val
+            gl.app.DisableCheck[idx] = disable_check
+
+            # SensorConfDic → ウィジェットに値反映
+            combo.set(gl.SensorConfDic[idx]['Sensor'])
+            in1.set(gl.SensorConfDic[idx]['In1'])
+            in2.set(gl.SensorConfDic[idx]['In2'])
+            out1.set(gl.SensorConfDic[idx]['Out1'])
+            out2.set(gl.SensorConfDic[idx]['Out2'])
+            out1inv_val.set(gl.SensorConfDic[idx]['Out1Inv'])
+            out2inv_val.set(gl.SensorConfDic[idx]['Out2Inv'])
+            para1.insert(tk.END, gl.SensorConfDic[idx]['DigitsCoef'])
+            para2.insert(tk.END, gl.SensorConfDic[idx]['CalcCoef'])
+            para3.insert(tk.END, gl.SensorConfDic[idx]['Ratio'])
+            para4.insert(tk.END, gl.SensorConfDic[idx]['TimeLag'])
+            disable_val.set(gl.SensorConfDic[idx]['Disable'])
+            if combo.get():
+                SensorSelect('', gl.SensorList, idx)
+
+        # ---- 表示中の行番号を計算 ----
+        def _get_visible_range():
+            h = canvas.winfo_height()
+            if h <= 1:
+                return 1, 20
+            y0 = canvas.canvasy(0)
+            y1 = canvas.canvasy(h)
+            rh = max(1, _row_h[0])
+            first = max(1, int(y0 / rh))
+            last  = min(gl.ChMax, int(y1 / rh) + 1)
+            return first, last
+
+        # ---- スクロール後に必要な行を生成 ----
+        def _update_visible_rows():
+            first, last = _get_visible_range()
+            first_buf = max(1, first - _BUFFER)
+            last_buf  = min(gl.ChMax, last + _BUFFER)
+            new_rows = False
+            for i in range(first_buf, last_buf + 1):
+                if i not in _rendered:
+                    _build_row(i)
+                    new_rows = True
+            if new_rows:
+                canvas.config(scrollregion=canvas.bbox('all'))
+
+        # ---- スクロールバーコマンド（行生成を伴う） ----
+        def _do_yview(*args):
+            canvas.yview(*args)
+            _schedule_update()
+
+        gl.app.Sensorybar.config(command=_do_yview)
+        gl.app.SensorFrame.bind("<MouseWheel>",  lambda e: _on_mousewheel(e))
+        gl.app.Sensorcanvas.bind("<MouseWheel>", lambda e: _on_mousewheel(e))
+
+        # ---- 初期描画: 最初の FIRST_ROWS 行のみウィジェット生成 ----
+        FIRST_ROWS = 20
+        for i in range(1, FIRST_ROWS + 1):
+            _build_row(i)
+
+        # 初期 FIRST_ROWS 行のみ update_idletasks（少行数なので高速）
+        _t0 = time.perf_counter()
+        gl.SensorConfWin.update_idletasks()
+
+        # 実際の行高さを計測してプレースホルダーサイズに使用
+        # SensorFrame にはヘッダーなし（データ行のみ）なので FIRST_ROWS で割る
+        total_h = gl.app.SensorFrame.winfo_reqheight()
+        _row_h[0] = max(1, total_h // FIRST_ROWS)
+
+        # 各列幅を max(ヘッダーラベル幅, データウィジェット幅) に揃える
+        # 小さい方はセル内に自動で余白を持つ形となる
+        for _col in range(13):
+            _hb = sensor_header_frame.grid_bbox(column=_col, row=0)
+            _db = gl.app.SensorFrame.grid_bbox(column=_col, row=1)
+            _cw = max(_hb[2] if _hb else 0, _db[2] if _db else 0)
+            if _cw > 0:
+                sensor_header_frame.grid_columnconfigure(_col, minsize=_cw)
+                gl.app.SensorFrame.grid_columnconfigure(_col, minsize=_cw)
+
+        # ウィンドウ幅をコンテンツ幅に合わせて自動調整（IO読書ウィンドウと同様）
+        gl.SensorConfWin.update_idletasks()
+        frame_w     = gl.app.SensorFrame.winfo_reqwidth()
+        scrollbar_w = gl.app.Sensorybar.winfo_reqwidth()
+        if scrollbar_w <= 1:
+            scrollbar_w = gl.app.Sensorybar.winfo_width()
+        fit_width = frame_w + scrollbar_w
+        gl.SensorConfWin.geometry(str(fit_width) + "x" + str(winheight))
+
+        # 残り行: ウィジェットなし、minsize でスクロール高さだけ確保
+        for i in range(FIRST_ROWS + 1, gl.ChMax + 1):
+            gl.app.SensorFrame.grid_rowconfigure(i, minsize=_row_h[0])
+        canvas.config(scrollregion=canvas.bbox('all'))
+
+        # ウィンドウ表示
         gl.SensorConfWin.deiconify()
         gl.SensorConfWin.grab_set()
         gl.SensorConfWin.focus_set()
-        gl.SensorConfWin.update()
-
-        # データ行
-        gl.app.SensorNolabel=[]
-        gl.app.SensorCombo=[]
-        gl.app.In1Combo=[]
-        gl.app.In2Combo=[]
-        gl.app.Out1Combo=[]
-        gl.app.Out2Combo=[]
-        gl.app.Out1InvCheck=[]
-        gl.app.Out1InvVal = []
-        gl.app.Out2InvCheck=[]
-        gl.app.Out2InvVal = []
-        gl.app.DigitsCoefText=[]
-        gl.app.CalcCoefText=[]
-        gl.app.RatioText=[]
-        gl.app.TimeLagText=[]
-        gl.app.DisableCheck=[]
-        gl.app.DisableVal = []
-
-        # after()でバッチ構築: イベントループを都度解放して編集可能になるまでの時間を短縮
-        BATCH = 20
-
-        def _build_batch(start):
-            if gl.SensorConfWin is None or not gl.SensorConfWin.winfo_exists():
-                return
-            canvas = gl.app.Sensorcanvas
-            end = min(start + BATCH, gl.ChMax + 1)
-
-            for i in range(start, end):
-                r = i  # row (0=ヘッダー, 1..ChMax=データ)
-
-                lbl = tk.Label(gl.app.SensorFrame, text=i, font=(deffont, fsizes))
-                lbl.grid(row=r, column=C_NO, padx=2)
-                lbl.bind("<MouseWheel>", lambda event, a=canvas, b=lbl: Bind.mouse_y_scroll(event, a, b))
-                lbl.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.SensorNolabel.insert(i, lbl)
-
-                combo = ttk.Combobox(gl.app.SensorFrame, values=gl.SensorList, font=(deffont, fsizes), width=8)
-                combo.grid(row=r, column=C_SENSOR, padx=2)
-                combo.bind('<FocusOut>', lambda event, arg1=combo, arg2=gl.SensorList, arg3=i-1: (Bind.ComboChange(event,arg1,arg2), SensorSelect(event,arg2,arg3)))
-                combo.bind("<<ComboboxSelected>>", lambda event, arg1=gl.SensorList, arg2=i-1: SensorSelect(event,arg1,arg2))
-                combo.bind("<MouseWheel>", lambda event, a=canvas, b=combo: Bind.mouse_y_scroll(event, a, b))
-                combo.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.SensorCombo.insert(i, combo)
-
-                in1 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
-                in1.grid(row=r, column=C_IN1, padx=2)
-                in1.bind('<FocusOut>', lambda event, arg1=in1, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
-                in1.bind("<MouseWheel>", lambda event, a=canvas, b=in1: Bind.mouse_y_scroll(event, a, b))
-                in1.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.In1Combo.insert(i, in1)
-
-                in2 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
-                in2.grid(row=r, column=C_IN2, padx=2)
-                in2.bind('<FocusOut>', lambda event, arg1=in2, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
-                in2.bind("<MouseWheel>", lambda event, a=canvas, b=in2: Bind.mouse_y_scroll(event, a, b))
-                in2.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.In2Combo.insert(i, in2)
-
-                out1 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
-                out1.grid(row=r, column=C_OUT1, padx=2)
-                out1.bind('<FocusOut>', lambda event, arg1=out1, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
-                out1.bind("<MouseWheel>", lambda event, a=canvas, b=out1: Bind.mouse_y_scroll(event, a, b))
-                out1.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.Out1Combo.insert(i, out1)
-
-                out2 = ttk.Combobox(gl.app.SensorFrame, values=gl.EnableCh, font=(deffont, fsizes), width=3)
-                out2.grid(row=r, column=C_OUT2, padx=2)
-                out2.bind('<FocusOut>', lambda event, arg1=out2, arg2=gl.EnableCh: Bind.ComboChange(event,arg1,arg2))
-                out2.bind("<MouseWheel>", lambda event, a=canvas, b=out2: Bind.mouse_y_scroll(event, a, b))
-                out2.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.Out2Combo.insert(i, out2)
-
-                out1inv_val = tk.BooleanVar()
-                out1inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out1inv_val)
-                out1inv_check.grid(row=r, column=C_OUT1INV, padx=2)
-                out1inv_check.bind("<MouseWheel>", lambda event, a=canvas, b=out1inv_check: Bind.mouse_y_scroll(event, a, b))
-                out1inv_check.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.Out1InvVal.insert(i, out1inv_val)
-                gl.app.Out1InvCheck.insert(i, out1inv_check)
-
-                out2inv_val = tk.BooleanVar()
-                out2inv_check = ttk.Checkbutton(gl.app.SensorFrame, variable=out2inv_val)
-                out2inv_check.grid(row=r, column=C_OUT2INV, padx=2)
-                out2inv_check.bind("<MouseWheel>", lambda event, a=canvas, b=out2inv_check: Bind.mouse_y_scroll(event, a, b))
-                out2inv_check.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.Out2InvVal.insert(i, out2inv_val)
-                gl.app.Out2InvCheck.insert(i, out2inv_check)
-
-                para1 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
-                para1.grid(row=r, column=C_PARA1, padx=2)
-                para1.bind('<FocusOut>', lambda event, arg1=para1: Bind.TextFloatCheck(event,arg1))
-                para1.bind("<MouseWheel>", lambda event, a=canvas, b=para1: Bind.mouse_y_scroll(event, a, b))
-                para1.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.DigitsCoefText.insert(i, para1)
-
-                para2 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
-                para2.grid(row=r, column=C_PARA2, padx=2)
-                para2.bind('<FocusOut>', lambda event, arg1=para2: Bind.TextFloatCheck(event,arg1))
-                para2.bind("<MouseWheel>", lambda event, a=canvas, b=para2: Bind.mouse_y_scroll(event, a, b))
-                para2.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.CalcCoefText.insert(i, para2)
-
-                para3 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
-                para3.grid(row=r, column=C_PARA3, padx=2)
-                para3.bind('<FocusOut>', lambda event, arg1=para3: Bind.TextFloatCheck(event,arg1))
-                para3.bind("<MouseWheel>", lambda event, a=canvas, b=para3: Bind.mouse_y_scroll(event, a, b))
-                para3.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.RatioText.insert(i, para3)
-
-                para4 = tk.Entry(gl.app.SensorFrame, font=(deffont, fsizes), width=8)
-                para4.grid(row=r, column=C_PARA4, padx=2)
-                para4.bind('<FocusOut>', lambda event, arg1=para4: Bind.TextFloatCheck(event,arg1))
-                para4.bind("<MouseWheel>", lambda event, a=canvas, b=para4: Bind.mouse_y_scroll(event, a, b))
-                para4.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.TimeLagText.insert(i, para4)
-
-                disable_val = tk.BooleanVar()
-                disable_check = ttk.Checkbutton(gl.app.SensorFrame, variable=disable_val)
-                disable_check.grid(row=r, column=C_DISABLE, padx=2)
-                disable_check.bind("<MouseWheel>", lambda event, a=canvas, b=disable_check: Bind.mouse_y_scroll(event, a, b))
-                disable_check.bind("<FocusIn>", lambda event: Bind.TipDel(event))
-                gl.app.DisableVal.insert(i, disable_val)
-                gl.app.DisableCheck.insert(i, disable_check)
-
-                # ウィジェットに値を反映
-                idx = i - 1
-                combo.set(gl.SensorConfDic[idx]['Sensor'])
-                in1.set(gl.SensorConfDic[idx]['In1'])
-                in2.set(gl.SensorConfDic[idx]['In2'])
-                out1.set(gl.SensorConfDic[idx]['Out1'])
-                out2.set(gl.SensorConfDic[idx]['Out2'])
-                out1inv_val.set(gl.SensorConfDic[idx]['Out1Inv'])
-                out2inv_val.set(gl.SensorConfDic[idx]['Out2Inv'])
-                para1.insert(tk.END, gl.SensorConfDic[idx]['DigitsCoef'])
-                para2.insert(tk.END, gl.SensorConfDic[idx]['CalcCoef'])
-                para3.insert(tk.END, gl.SensorConfDic[idx]['Ratio'])
-                para4.insert(tk.END, gl.SensorConfDic[idx]['TimeLag'])
-                disable_val.set(gl.SensorConfDic[idx]['Disable'])
-                SensorSelect('', gl.SensorList, idx)
-
-            canvas.config(scrollregion=canvas.bbox('all'))
-
-            if end <= gl.ChMax:
-                # 次のバッチをイベントループに委ねる（ユーザー操作を都度受け付けるため）
-                gl.SensorConfWin.after(0, _build_batch, end)
-            else:
-                # 全行構築完了後の最終セットアップ
-                gl.SensorConfWin.protocol('WM_DELETE_WINDOW', SensorConfWincallback)
-                # スクロール範囲を確定し、以降の変更に追従するよう<Configure>をバインド
-                gl.app.SensorFrame.bind("<Configure>", lambda e: gl.app.Sensorcanvas.config(scrollregion=gl.app.Sensorcanvas.bbox('all')))
-
-        # 最初のバッチをイベントループ経由で開始（ウィンドウを即座に操作可能にするため）
-        gl.SensorConfWin.after(0, _build_batch, 1)
+        gl.SensorConfWin.protocol('WM_DELETE_WINDOW', SensorConfWincallback)
+        gl.app.SensorFrame.bind("<Configure>",
+            lambda e: canvas.config(scrollregion=canvas.bbox('all')))
 
     else:
         gl.SensorConfWin.lift()
@@ -255,20 +343,26 @@ def ConfClear():
     if inspect.stack()[1].function != 'DefConf':
         if not messagebox.askyesno('設定クリア','現在の入力をクリアしますか？') :
             return
-    
-    for i in range(1, len(gl.app.SensorCombo)+1) :#内容クリア（バッチ構築中は構築済みの行のみ）
-        gl.app.SensorCombo[i-1].set('')
-        gl.app.In1Combo[i-1].set('')
-        gl.app.In2Combo[i-1].set('')
-        gl.app.Out1Combo[i-1].set('')
-        gl.app.Out2Combo[i-1].set('')
-        gl.app.Out1InvVal[i-1].set(False)
-        gl.app.Out2InvVal[i-1].set(False)
-        gl.app.DigitsCoefText[i-1].delete(0,tk.END)
-        gl.app.CalcCoefText[i-1].delete(0,tk.END)
-        gl.app.RatioText[i-1].delete(0,tk.END)
-        gl.app.TimeLagText[i-1].delete(0,tk.END)
-        gl.app.DisableVal[i-1].set(False)
+
+    _empty = {'Sensor':'','In1':'','In2':'','Out1':'','Out2':'',
+              'Out1Inv':False,'Out2Inv':False,
+              'DigitsCoef':'','CalcCoef':'','Ratio':'','TimeLag':'','Disable':False}
+    # 全行: SensorConfDic をクリア / 描画済み行: ウィジェットもクリア
+    for i in range(gl.ChMax):
+        gl.SensorConfDic[i] = dict(_empty)
+        if gl.app.SensorCombo[i] is not None:
+            gl.app.SensorCombo[i].set('')
+            gl.app.In1Combo[i].set('')
+            gl.app.In2Combo[i].set('')
+            gl.app.Out1Combo[i].set('')
+            gl.app.Out2Combo[i].set('')
+            gl.app.Out1InvVal[i].set(False)
+            gl.app.Out2InvVal[i].set(False)
+            gl.app.DigitsCoefText[i].delete(0, tk.END)
+            gl.app.CalcCoefText[i].delete(0, tk.END)
+            gl.app.RatioText[i].delete(0, tk.END)
+            gl.app.TimeLagText[i].delete(0, tk.END)
+            gl.app.DisableVal[i].set(False)
 
 def SensorSelect(event,list,num):
     if gl.app.SensorCombo[num].get() in list :
@@ -400,12 +494,24 @@ def SensorSelect(event,list,num):
 
         
 def BackUp():
-    #変数に値格納
+    # 変数に値格納（バーチャルスクロール対応）
+    # 描画済み行はウィジェットから読む / 未描画行は gl.SensorConfDic をそのまま維持
     for i in range(gl.ChMax):
-        gl.SensorConfDic[i] = {'Sensor':gl.app.SensorCombo[i].get(),'In1':gl.app.In1Combo[i].get(),'In2':gl.app.In2Combo[i].get(),\
-                'Out1':gl.app.Out1Combo[i].get(),'Out2':gl.app.Out2Combo[i].get(),'Out1Inv':gl.app.Out1InvVal[i].get(),\
-                'Out2Inv':gl.app.Out2InvVal[i].get(),'DigitsCoef':gl.app.DigitsCoefText[i].get(),'CalcCoef':gl.app.CalcCoefText[i].get(),\
-                'Ratio':gl.app.RatioText[i].get(),'TimeLag':gl.app.TimeLagText[i].get(),'Disable':gl.app.DisableVal[i].get()}
+        if gl.app.SensorCombo[i] is not None:
+            gl.SensorConfDic[i] = {
+                'Sensor':    gl.app.SensorCombo[i].get(),
+                'In1':       gl.app.In1Combo[i].get(),
+                'In2':       gl.app.In2Combo[i].get(),
+                'Out1':      gl.app.Out1Combo[i].get(),
+                'Out2':      gl.app.Out2Combo[i].get(),
+                'Out1Inv':   gl.app.Out1InvVal[i].get(),
+                'Out2Inv':   gl.app.Out2InvVal[i].get(),
+                'DigitsCoef':gl.app.DigitsCoefText[i].get(),
+                'CalcCoef':  gl.app.CalcCoefText[i].get(),
+                'Ratio':     gl.app.RatioText[i].get(),
+                'TimeLag':   gl.app.TimeLagText[i].get(),
+                'Disable':   gl.app.DisableVal[i].get(),
+            }
 
 #サブウインドウを閉じ受付時の処理
 def SensorConfWincallback():
