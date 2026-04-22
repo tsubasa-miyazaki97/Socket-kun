@@ -27,7 +27,7 @@ class App(tk.Tk):
         self.title("IO読書")
 
         # ウィンドウの大きさを決定
-        self.geometry(str(gl.winmaxwidth)+"x"+str(gl.winheight))
+        self.geometry(str(gl.winwidth)+"x"+str(gl.winheight))
 
         # ツールバー行(row=0)は固定、キャンバス行(row=1)を伸縮
         self.grid_rowconfigure(0, weight=0)
@@ -86,6 +86,10 @@ class App(tk.Tk):
         self.TraceScanTimems = tk.Label(toolbar_frame, text='ms', font=(gl.deffont, gl.fsizes))
         self.TraceScanTimems.grid(row=0, column=tc, padx=2)
         tc += 1
+        ###表示範囲切替ボタン
+        self.WinWidthButton = tk.Button(toolbar_frame, text="▶", command=lambda: Bind.WinWidthSwitch())
+        self.WinWidthButton.grid(row=0, column=tc, padx=2)
+        tc += 1
         # 右寄せ用スペーサー
         spacer = tk.Label(toolbar_frame, text="")
         spacer.grid(row=0, column=tc, sticky="ew")
@@ -114,7 +118,7 @@ class App(tk.Tk):
 #-----------------------------------canvas / main_frame--------------------
 
         # スクロールバー設置
-        self.canvas = tk.Canvas(self, width=gl.winmaxwidth, height=gl.winheight, highlightthickness=0)
+        self.canvas = tk.Canvas(self, width=gl.winwidth, height=gl.winheight, highlightthickness=0)
         self.canvas.grid(row=1, column=0, sticky="nsew")
 
         self.ybar = tk.Scrollbar(self, orient=tk.VERTICAL)  # 縦スクロールバー配置
@@ -141,12 +145,11 @@ class App(tk.Tk):
         C_UDVALUE   = 6
         C_INIT      = 7
         C_COMMENT   = 8
-        C_WINBTN    = 9
-        C_VARTYPE   = 10
-        C_AI0       = 11
-        C_AI100     = 12
-        C_USER0     = 13
-        C_USER100   = 14
+        C_VARTYPE   = 9
+        C_AI0       = 10
+        C_AI100     = 11
+        C_USER0     = 12
+        C_USER100   = 13
 
 #-----------------------------------ヘッダー行 (row=0)--------------------
 
@@ -173,10 +176,6 @@ class App(tk.Tk):
 
         self.CommentLabel = tk.Label(self.main_frame, text="ｺﾒﾝﾄ", font=(gl.deffont, gl.fsizes))
         self.CommentLabel.grid(row=0, column=C_COMMENT, padx=2, pady=2)
-
-        ###表示範囲切替ボタン
-        self.WinWidthButton = tk.Button(self.main_frame, text="◀", command=lambda: Bind.WinWidthSwitch())
-        self.WinWidthButton.grid(row=0, column=C_WINBTN, padx=2, pady=2)
 
         self.VarTypeLabel = tk.Label(self.main_frame, text="型", font=(gl.deffont, gl.fsizes))
         self.VarTypeLabel.grid(row=0, column=C_VARTYPE, padx=2, pady=2)
