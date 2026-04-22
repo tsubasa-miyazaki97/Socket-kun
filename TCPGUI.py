@@ -94,27 +94,22 @@ class App(tk.Tk):
         # 通信設定ボタン
         self.changePageButton = tk.Button(toolbar_frame, text="通信設定", command=lambda: ConectConfdef())
         self.changePageButton.grid(row=0, column=tc, padx=2)
-        self.changePageButton.grid_remove()
         tc += 1
         # センサー設定ボタン
         self.SensorConfButton = tk.Button(toolbar_frame, text="ｾﾝｻｰ設定", command=lambda: SensorConfdef())
         self.SensorConfButton.grid(row=0, column=tc, padx=2)
-        self.SensorConfButton.grid_remove()
         tc += 1
         # IO設定クリアボタン
         self.IOClearConfButton = tk.Button(toolbar_frame, text="IO設定ｸﾘｱ", command=lambda: Bind.IOConfClear())
         self.IOClearConfButton.grid(row=0, column=tc, padx=2)
-        self.IOClearConfButton.grid_remove()
         tc += 1
         # ｴｸｽﾎﾟｰﾄボタン
         self.ExportButton = tk.Button(toolbar_frame, text="ｴｸｽﾎﾟｰﾄ", command=lambda: InExeport.Export())
         self.ExportButton.grid(row=0, column=tc, padx=2)
-        self.ExportButton.grid_remove()
         tc += 1
         # インポートボタン
         self.InportButton = tk.Button(toolbar_frame, text="ｲﾝﾎﾟｰﾄ", command=lambda: InExeport.Inport())
         self.InportButton.grid(row=0, column=tc, padx=2)
-        self.InportButton.grid_remove()
 
 #-----------------------------------canvas / main_frame--------------------
 
