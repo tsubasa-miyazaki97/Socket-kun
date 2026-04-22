@@ -361,6 +361,12 @@ class App(tk.Tk):
         right_y = max(0, (toolbar_h - right_h) // 2)
         self.right_toolbar.place(x=right_x, y=right_y)
 
+        # フルウィンドウ幅を更新（インポートボタン右端＋縦スクロールバー幅）
+        gl.winmaxwidth = right_x + right_w + scrollbar_w
+        # フルウィンドウ表示中ならウィンドウ幅を調整
+        if self.WinWidthButton['text'] == "◀":
+            self.geometry(str(gl.winmaxwidth) + "x" + str(gl.winheight))
+
 def ConectConfdef():
     ConectConf.ConectConf()  
 
