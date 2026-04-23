@@ -3,15 +3,27 @@ import TCPGlobalVar as gl
 import PIDControl as PID
 iscloseNo = 0.00000001#センサーの読込値と書込み値の近似値判定範囲 大きい方が緩い
 
+def _get_device_no(idx):
+    combo = gl.app.DeviceNoCombo[idx]
+    if combo is None:
+        return None
+    return int(combo.get()) - 1
+
 def EdgeSensor(i,now):
 
-    In1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In1'])-1].get())-1
+    In1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In1'])-1)
+    if In1DeviceNo is None:
+        return
     In1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In1'])-1].get()
     if gl.SensorConfDic[i]['Out1'] != '' :
-        Out1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out1'])-1].get())-1
+        Out1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['Out1'])-1)
+        if Out1DeviceNo is None:
+            return
         Out1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['Out1'])-1].get()
     if gl.SensorConfDic[i]['Out2'] != '' :
-        Out2DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out2'])-1].get())-1
+        Out2DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['Out2'])-1)
+        if Out2DeviceNo is None:
+            return
         Out2Address = gl.app.AddressText[int(gl.SensorConfDic[i]['Out2'])-1].get()
         
     #桁合わせ処理
@@ -83,24 +95,38 @@ def EdgeSensor(i,now):
 def Dancer(i,flag,now):
 
     if not flag :#径演算付きではない
-        In1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In1'])-1].get())-1#自軸
+        In1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In1'])-1)#自軸
+        if In1DeviceNo is None:
+            return
         In1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In1'])-1].get()
-        In2DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In2'])-1].get())-1#参照
+        In2DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In2'])-1)#参照
+        if In2DeviceNo is None:
+            return
         In2Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In2'])-1].get()
     else:
         DiameterNo = int(gl.SensorConfDic[i]['In1'])-1
-        In1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[DiameterNo]['In1'])-1].get())-1#自軸
+        In1DeviceNo = _get_device_no(int(gl.SensorConfDic[DiameterNo]['In1'])-1)#自軸
+        if In1DeviceNo is None:
+            return
         In1Address = gl.app.AddressText[int(gl.SensorConfDic[DiameterNo]['In1'])-1].get()
-        In2DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In2'])-1].get())-1#参照軸
+        In2DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In2'])-1)#参照軸
+        if In2DeviceNo is None:
+            return
         In2Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In2'])-1].get()
-        In3DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[DiameterNo]['Out1'])-1].get())-1#径センサ
+        In3DeviceNo = _get_device_no(int(gl.SensorConfDic[DiameterNo]['Out1'])-1)#径センサ
+        if In3DeviceNo is None:
+            return
         In3Address = gl.app.AddressText[int(gl.SensorConfDic[DiameterNo]['Out1'])-1].get()
 
         if gl.SensorConfDic[DiameterNo]['In2'] != '' :#径演算径Ch選択有
-            In4DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[DiameterNo]['In2'])-1].get())-1
+            In4DeviceNo = _get_device_no(int(gl.SensorConfDic[DiameterNo]['In2'])-1)
+            if In4DeviceNo is None:
+                return
             In4Address = gl.app.AddressText[int(gl.SensorConfDic[DiameterNo]['In2'])-1].get()
 
-    Out1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out1'])-1].get())-1
+    Out1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['Out1'])-1)
+    if Out1DeviceNo is None:
+        return
     Out1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['Out1'])-1].get()
 
     #桁合わせ処理
@@ -197,24 +223,38 @@ def Dancer(i,flag,now):
 def TensionMeter(i,flag,now):
     
     if not flag :#径演算付きではない
-        In1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In1'])-1].get())-1#自軸
+        In1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In1'])-1)#自軸
+        if In1DeviceNo is None:
+            return
         In1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In1'])-1].get()
-        In2DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In2'])-1].get())-1#参照
+        In2DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In2'])-1)#参照
+        if In2DeviceNo is None:
+            return
         In2Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In2'])-1].get()
     else:
         DiameterNo = int(gl.SensorConfDic[i]['In1'])-1
-        In1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[DiameterNo]['In1'])-1].get())-1#自軸
+        In1DeviceNo = _get_device_no(int(gl.SensorConfDic[DiameterNo]['In1'])-1)#自軸
+        if In1DeviceNo is None:
+            return
         In1Address = gl.app.AddressText[int(gl.SensorConfDic[DiameterNo]['In1'])-1].get()
-        In2DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In2'])-1].get())-1#参照軸
+        In2DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In2'])-1)#参照軸
+        if In2DeviceNo is None:
+            return
         In2Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In2'])-1].get()
-        In3DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[DiameterNo]['Out1'])-1].get())-1#径センサ
+        In3DeviceNo = _get_device_no(int(gl.SensorConfDic[DiameterNo]['Out1'])-1)#径センサ
+        if In3DeviceNo is None:
+            return
         In3Address = gl.app.AddressText[int(gl.SensorConfDic[DiameterNo]['Out1'])-1].get()
 
         if gl.SensorConfDic[DiameterNo]['In2'] != '' :#径演算径Ch選択有
-            In4DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[DiameterNo]['In2'])-1].get())-1#径演算径
+            In4DeviceNo = _get_device_no(int(gl.SensorConfDic[DiameterNo]['In2'])-1)#径演算径
+            if In4DeviceNo is None:
+                return
             In4Address = gl.app.AddressText[int(gl.SensorConfDic[DiameterNo]['In2'])-1].get()
 
-    Out1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out1'])-1].get())-1
+    Out1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['Out1'])-1)
+    if Out1DeviceNo is None:
+        return
     Out1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['Out1'])-1].get()
 
     #if not flag :#径演算付きではない
@@ -344,13 +384,19 @@ def TensionMeter(i,flag,now):
 
 def DiameterSensor(i,now):
     
-    In1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In1'])-1].get())-1
+    In1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In1'])-1)
+    if In1DeviceNo is None:
+        return
     In1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In1'])-1].get()
-    Out1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out1'])-1].get())-1
+    Out1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['Out1'])-1)
+    if Out1DeviceNo is None:
+        return
     Out1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['Out1'])-1].get()
     
     if gl.SensorConfDic[i]['In2'] != '' :#径演算径Ch選択有
-        In2DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In2'])-1].get())-1
+        In2DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In2'])-1)
+        if In2DeviceNo is None:
+            return
         In2Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In2'])-1].get()
     
     #桁合わせ処理
@@ -431,13 +477,19 @@ def DiameterSensor(i,now):
 
 def Equal(i,now):
 
-    In1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In1'])-1].get())-1
+    In1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In1'])-1)
+    if In1DeviceNo is None:
+        return
     In1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In1'])-1].get()
     if gl.SensorConfDic[i]['Out1'] != '' :
-        Out1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out1'])-1].get())-1
+        Out1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['Out1'])-1)
+        if Out1DeviceNo is None:
+            return
         Out1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['Out1'])-1].get()
     if gl.SensorConfDic[i]['Out2'] != '' :
-        Out2DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out2'])-1].get())-1
+        Out2DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['Out2'])-1)
+        if Out2DeviceNo is None:
+            return
         Out2Address = gl.app.AddressText[int(gl.SensorConfDic[i]['Out2'])-1].get()
         
     #入力値
@@ -482,12 +534,16 @@ def BitCalcOut(i,now):
     WriteFlag = False
     #判定値
     if gl.SensorConfDic[i]['In1'] != '' :
-        In1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In1'])-1].get())-1
+        In1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In1'])-1)
+        if In1DeviceNo is None:
+            return
         In1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In1'])-1].get()
     
     #出力値
     if gl.SensorConfDic[i]['Out2'] != '' :
-        Out1DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out2'])-1].get())-1
+        Out1DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['Out2'])-1)
+        if Out1DeviceNo is None:
+            return
         Out1Address = gl.app.AddressText[int(gl.SensorConfDic[i]['Out2'])-1].get()
     #if gl.SensorConfDic[i]['Out2'] != '' :
     #    Out2DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out2'])-1].get())-1
@@ -495,7 +551,9 @@ def BitCalcOut(i,now):
 
     #OFF時出力値
     if gl.SensorConfDic[i]['In2'] != '' :
-        In2DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['In2'])-1].get())-1
+        In2DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['In2'])-1)
+        if In2DeviceNo is None:
+            return
         In2Address = gl.app.AddressText[int(gl.SensorConfDic[i]['In2'])-1].get()
 
         #入力値
@@ -510,7 +568,9 @@ def BitCalcOut(i,now):
 
     #ON時出力値
     if gl.SensorConfDic[i]['Out1'] != '' :
-        In3DeviceNo = int(gl.app.DeviceNoCombo[int(gl.SensorConfDic[i]['Out1'])-1].get())-1
+        In3DeviceNo = _get_device_no(int(gl.SensorConfDic[i]['Out1'])-1)
+        if In3DeviceNo is None:
+            return
         In3Address = gl.app.AddressText[int(gl.SensorConfDic[i]['Out1'])-1].get()
 
         #入力値

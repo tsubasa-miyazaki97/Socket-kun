@@ -46,7 +46,7 @@ def ConectConf() :
         tk.Label(content_frame, text="PORT", font=(deffont, fsizes)).grid(row=0, column=3, padx=5, pady=4)
 
         # データ行
-        gl.app.Nolabel=[]
+        conect_nolabel=[]
         gl.app.DeviceCombo=[]
         gl.app.IPText=[]
         gl.app.PortText=[]
@@ -55,7 +55,7 @@ def ConectConf() :
 
             lbl = tk.Label(content_frame, text=i, font=(deffont, fsizes))
             lbl.grid(row=r, column=0, padx=5, pady=2)
-            gl.app.Nolabel.insert(i, lbl)
+            conect_nolabel.insert(i, lbl)
 
             combo = ttk.Combobox(content_frame, values=gl.DeviceList, font=(deffont, fsizes), width=16)
             combo.grid(row=r, column=1, padx=5, pady=2)
@@ -135,8 +135,9 @@ def ConectConfWincallback():
 def IOConfWinChange():
 
     for i in range(gl.ChMax):
-        gl.app.DeviceNoCombo[i]['values']=gl.EnableDevice
-        gl.app.DeviceNoCombo[i].bind('<FocusOut>',lambda event,arg1=gl.app.DeviceNoCombo[i-1],arg2=gl.EnableDevice:Bind.ComboChange(event,arg1,arg2))
+        if gl.app.DeviceNoCombo[i] is not None:
+            gl.app.DeviceNoCombo[i]['values']=gl.EnableDevice
+            gl.app.DeviceNoCombo[i].bind('<FocusOut>',lambda event,arg1=gl.app.DeviceNoCombo[i-1],arg2=gl.EnableDevice:Bind.ComboChange(event,arg1,arg2))
     gl.app.Periodcombo['values']=gl.EnableDevice
     gl.app.Periodcombo.bind('<FocusOut>',lambda event,arg1=gl.app.Periodcombo,arg2=gl.EnableDevice:Bind.ComboChange(event,arg1,arg2))
 

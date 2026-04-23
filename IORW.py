@@ -215,10 +215,8 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
                             node_class = loop.run_until_complete(node.read_node_class())
                             if node_class == ua.NodeClass.Variable:
                                 ns_idx = node.nodeid.NamespaceIndex
-                                print("変数ノード発見:", node, "NodeId:", node.nodeid)
                                 if ns_idx != 0:
                                     user_ns_candidates.add(ns_idx)
-                                    print("ユーザー変数が存在するNamespaceIndex:", user_ns_candidates)
                         except Exception as e:
                             print(f"ノード判定エラー: {e}")
                 except Exception as e:
@@ -227,7 +225,6 @@ def IORWdef(ArrayAddress,AddDic,DeviceNo,Command):
             # 最初に見つかったユーザー名前空間を採用
             if user_ns_candidates:
                 ns_index = list(user_ns_candidates)[0]
-                print("選択された ns_index:", ns_index)
             else :
                 messagebox.showinfo('エラー', '変数が見つかりません')
                 return

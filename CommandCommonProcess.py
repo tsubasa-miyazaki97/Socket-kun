@@ -106,8 +106,6 @@ def RValueConv(Address,AddDic,BinaryValue) :
     elif AddDic[Address]['Var'] == 'ULong':
         AddValue, = unpack('L',BinaryValue)#4ﾊﾞｲﾄの符号無し整数
     elif AddDic[Address]['Var'] == 'Float':
-        print(Address)
-        print(BinaryValue)
         AddValue, = unpack('f',BinaryValue)#4ﾊﾞｲﾄの実数
     #elif AddDic[Address]['Var'] == 'Float(16bit)':
     #    AddValue = unpack('e',BinaryValue)#2ﾊﾞｲﾄの実数
